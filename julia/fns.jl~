@@ -1,0 +1,67 @@
+using Distributions, ThreadTools, Flux, InvertedIndices
+
+function zcat(args...)
+    cat(args...,dims=3)
+end
+
+function mapmap(f,args...)
+    map((args...)->map(f,args...),args...)
+end
+
+function tmapmap(f,args...)
+    tmap((args...)->map(f,args...),args...)
+end
+
+function tmapreduce(f,rf,args...)
+    rf(tmap(f,args...)...)
+end
+
+function scaledat(X::AbstractArray,dims=1)
+    Y = X ./ maximum(abs.(X),dims=dims)
+    Y[isnan.(Y)] .= 0
+    return Y
+end
+
+function sampledat(X::AbstractArray,k)
+    _,n = size(X)
+    sel = sample(1:n,k,replace=false)
+    test = X[:,sel]
+    train = X[:,Not(sel)]
+    return test,train
+end
+
+function wak(G)
+    #Matrix -> Matrix
+    #returns G with row sums normalized to 1
+    W = sum(G,dims=2)
+    K = G ./ W
+    K[isnan.(K)] .= 0
+    return K
+end
+
+function ehat(E,D,G)
+    (wak(G .* D) * E')'
+end
+
+function 𝕃(X,θ,E,D,G)
+    Flux.mse(X,(θ ∘ ehat)(E,D,G))
+end
+
+function partitionmat(C)
+    (sum ∘ map)(1:maximum(C)) do c
+        x = C .== c
+        return x * x'
+    end
+end
+
+function diffuse(X,θ,E,D,G,P,d)
+    M = P .* G
+    M = wak(M .* D)
+    foldl(1:d,init=(M,[])) do (M⁺,L),_
+        M⁺ = M⁺ * M
+        L⁺ = Flux.mse(X,θ((M⁺ * E')'))
+        L = vcat(L,L⁺)
+        return M⁺,L
+    end
+end
+
