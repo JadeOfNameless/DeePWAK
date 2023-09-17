@@ -1,5 +1,5 @@
 using Pkg
-Pkg.activate("leiden")
+Pkg.activate("julia/leiden")
 
 using CSV, DataFrames, Tensors, CategoricalArrays, Distributions,
     Flux, LinearAlgebra, SparseArrays, Distances, ProgressMeter, CUDA
