@@ -20,7 +20,7 @@ $$
 $$
 
 # DeePWAK
-Self-supervised hyperparameter selection using deep learning of a partitioned weighted affinity kernel.
+Self-supervised model selection using Deep learning of a Partitioned Weighted Affinity Kernel.
 
 # Julia Dependencies
 Julia 1.9
