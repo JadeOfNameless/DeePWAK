@@ -1,5 +1,5 @@
 using Pkg
-Pkg.activate("leiden")
+#Pkg.activate("leiden")
 using Flux, CUDA, Functors, ProgressMeter
 
 macro train!(Model)
@@ -79,7 +79,7 @@ function encoderlayers(m::Integer,d::Integer,l::Integer,σ=relu)
     end
 end
     
-function train!(α::Autoencoder)
+function train!(α::Aθ = Chain(utoencoder)
     @showprogress for _ in 1:α.epochs
         for l in α.loader
             x,y = l
@@ -119,7 +119,8 @@ function (δ::DistEnc)(E)
     pairs = genpairs(E)
     D = δ.encoder(pairs)
     D = reshape(D,(n,n)) .* (1 .- (I(n)|>gpu))
-    D = D ./ (sum(D,dims=1) .+ eps(eltype(D)))
+    #D = D ./ (sum(D,dims=1) .+ eps(eltype(D)))
+    D = softmax(D,dims=1)
     return D
 end
 
@@ -128,6 +129,11 @@ function train!(α::Autoencoder,δ::DistEnc)
     map(1:δ.epochs) do _
         map(α.loader) do (x,y)
             E = α.encoder(x)
+        end
+    end
+    end
+end
+
 
 function distenc(X::AbstractMatrix,α::Autoencoder,l::Integer;
                  epochs=100,σ=relu,loss=Flux.mse,η=0.01,λ=0,batchsize=1024)
@@ -150,6 +156,36 @@ function genpairs(X::CuArray)
     return vcat(X_1, X_2)
 end
 
+function wak(G::AbstractArray)
+    m, n = size(G)
+    G = G .* (1 .- I(n))
+    G = G ./ (sum(G,dims=1) .+ eps(eltype(G)))
+    return G
+end
+function wak(G::CuArray)
+    m, n = size(G)
+    G = G .* (1 .- (I(n)|>gpu))
+    G = G ./ (sum(G,dims=1) .+ eps(eltype(G)))
+    return G
+end
+
+
+function zca(X,dims=1)
+    i,j = size(X)
+    if j<2
+        return zeros(i,i)
+    end
+    μ = mean(X,dims=2)
+    X = X .- μ
+    Σ = cov(X,dims=2)
+    Λ,U = eigen(Σ)
+    Λ_neghalf = 1 ./ sqrt.(abs.(Λ))
+    Λ_neghalf = Λ_neghalf .* ((Λ .> 0) .- (Λ .< 0))
+    W = U * Diagonal(Λ_neghalf) * U'
+    W = scaledat(W,dims)
+    return W
+end
+
 function L_δ(α::Autoencoder,X,Y,D)
     m,n = size(Y)
     E = α.encoder(X)
@@ -158,3 +194,20 @@ function L_δ(α::Autoencoder,X,Y,D)
     Ŷ = α.decoder(E * D)
     Flux.mse(Ŷ,Y)
 end
+
+mutable struct SoftNN
+    k::Flux.Parallel
+end
+@functor
+
+function softNN(k,𝐝)
+    n = length(𝐝)
+    foldl(1:k,zeros(n)) do d,k
+
+              
+function (g::SoftNN)(k,D)
+    K = 
+          
+
+
+function softpart

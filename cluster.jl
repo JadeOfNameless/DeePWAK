@@ -79,7 +79,7 @@ bfŋ = 1:32
 𝛄 = rand(Uniform(0.1,3),128);
 𝐝 = 128
 
-dat = (DataFrame ∘ CSV.File)("z_dat.csv",normalizenames=true);
+dat = (DataFrame ∘ CSV.File)("data/z_dat.csv",normalizenames=true);
 dat = (scaledat ∘ Matrix)(dat[:,2:end]);
 dat = hcat(filter(x->sum(x) != 0,eachslice(dat,dims=2))...);
 

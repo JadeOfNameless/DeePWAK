@@ -1,3 +1,6 @@
+using Pkg
+Pkg.activate("leiden")
+
 using CSV, DataFrames, #Tensors, CategoricalArrays, 
     #SparseArrays, Distances,
     Flux, ProgressMeter, CUDA
