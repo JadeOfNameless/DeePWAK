@@ -91,12 +91,12 @@ function loss(X,θ)
     H_dm = (mean ∘ H)(dm.weight)
     H_E = (H_md + H_dd + H_dm) / 3
 
-    E = (dd ∘ md)(X)
+    E = θ[1:2](X)
     D = 1 ./ (euclidean(E) .+ eps(Float32))
     D = wak(D)
 
     H_D = (mean ∘ H)(D)
-    L = Flux.mse(X,dm((D * E')'))
+    L = Flux.mse(X,θ[3]((D * E')'))
     return ((H_E + H_D) / 2) * L
     #L = Flux.mse(X,θ(X))
     #return H_E * L
@@ -161,7 +161,7 @@ loader = Flux.DataLoader((X̃,X̃),batchsize=batchsize,shuffle=true) |> gpu
 
 x,y = first(loader)
 state = Flux.setup(opt,θ);
-L,∇ = Flux.withgradient(θ->loss(x,θ),θ)
+L,∇ = Flux.withgradient(x->loss(x,θ),x)
 
 # Forward pass
 y, back = Zygote.pullback(x->loss(x,θ), x)

@@ -79,7 +79,7 @@ function encoderlayers(m::Integer,d::Integer,l::Integer,σ=relu)
     end
 end
     
-function train!(α::Aθ = Chain(utoencoder)
+function train!(α::Autoencoder)
     @showprogress for _ in 1:α.epochs
         for l in α.loader
             x,y = l
