@@ -17,6 +17,12 @@ mutable struct OneToOne
 end
 @functor OneToOne (weight,bias)
 
+mutable struct Softmax
+    weight::AbstractArray
+    bias::AbstractArray
+end
+@functor Softmax (weight,bias)
+
 # Constructor for initializing the layer with a diagonal matrix
 function OneToOne(in::Integer, out::Integer, σ = identity)
     # initializing with non-zero diagonal values
@@ -27,8 +33,6 @@ end
 
 # Forward pass for the custom layer
 (layer::OneToOne)(x) = layer.σ(Diagonal(layer.weight) .* x .+ layer.bias)
-
-@adjoint (l::OneToOne)(x) = l(x),x̄->(
 
 function Zygote.pullback(layer::OneToOne,x::AbstractArray)
     y = layer(x)
