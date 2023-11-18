@@ -44,4 +44,4 @@ Rscript plot.clust.R
 DeePWAK attempts to generalize [a pipeline for automatic phenotype detection in microscopy images](https://github.com/ChristiaenLab/CrobustaScreen). 
 
 # Overview
-![overview](https://github.com/kewiechecki/DeePWAK/blob/master/tikz/optimization/optimization.svg?raw=true)
+![overview](https://github.com/kewiechecki/DeePWAK/blob/master/tikz/optimization/optimization.png?raw=true)
