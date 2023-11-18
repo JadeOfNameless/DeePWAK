@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+    node distance = 5mm and 5mm,
+    punkt/.style = {rectangle, draw},
+    pil/.style = {black, -stealth},
+    font=\small
+    ]
+    %nodes
+    \node[punkt,label=right:$n$ samples with $m$ parameters] (X)
+            {$X^{n \times m}$} ;
+    %\node[punkt,label=right:encoder] (encoder) [below=of X]
+    %     {$\theta_e^{m \times \mathng}$} ;
+    \node[punkt,label=right:$d$-dimensional embedding] (E)
+        [below=of X] {$E^{n \times d}$} ;
+    \node[punkt,label=right:$k$-NN] (knn)
+        [below=of E]
+        {$\kNN[k,E^{n \times d}]$} ;
+
+    \node[punkt,label=right:adjacency matrix] (G) [below=of knn]
+            {$G_{d,k}^{n \times n}$};
+    \node[punkt,label=right:clustering algorithm] (leiden) [below=of G]
+            {$\leiden[\gamma,G_{d,k}^{n \times n}]$};
+    \node[punkt,label=right:clusters] (P) [below=of leiden]
+        {$P_{d,k,\gamma}^{n \times n}$};
+
+    % edges
+    \draw[pil]  (X)     edge    (E)
+    (E) edge (knn)
+    (knn) edge (G)
+    (G) edge (leiden)
+    (leiden) edge (P);
+\end{tikzpicture}
