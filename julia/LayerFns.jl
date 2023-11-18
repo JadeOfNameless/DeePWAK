@@ -1,6 +1,12 @@
 using Flux, LinearAlgebra, CUDA, Distributions
 
-function H(W;dims=1)
+function H(W::AbstractArray)
+    W = abs.(W) .+ eps(eltype(W))
+    W = W ./ sum(W)
+    return -sum(W .* log2.(W))
+end
+
+function H(W::AbstractMatrix;dims=1)
     W = abs.(W) .+ eps(eltype(W))
     W = W ./ sum(W,dims=dims)
     return -sum(W .* log2.(W),dims=dims)

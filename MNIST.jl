@@ -2,10 +2,10 @@ include("julia/LayerTypes.jl")
 include("julia/LayerFns.jl")
 
 epochs = 100
-d = 50
-c = 20
+d = 100
+c = 100
 η = 0.01
-λ = 0.01
+λ = 0.0
 batchsize=1024
 
 α = 0.1
@@ -13,7 +13,8 @@ batchsize=1024
 γ = 1
 δ = 1
 
-using MLDatasets, ProgressMeter
+using MLDatasets, ProgressMeter, StatPlots
+using ImageInTerminal
 
 dat = MNIST.traindata();
 X = vcat(eachslice(dat[1],dims=1)...);
@@ -24,12 +25,11 @@ opt = Flux.Optimiser(Flux.AdamW(η),Flux.WeightDecay(λ))
 
 X̃ = zfc(X) |> gpu
 
-loader = Flux.DataLoader((X̃,X̃),batchsize=batchsize,shuffle=true) |> gpu
+loader = Flux.DataLoader((X̃,X),batchsize=batchsize,shuffle=true) |> gpu
 
 md = Dense(m => d, relu) |> gpu
 dm = Dense(d => m, relu) |> gpu
 
-autoencoder = Chain(md,dm)
 state = Flux.setup(opt,m)
 l,∇ = Flux.withgradient(loss,m)
 Flux.update!(state,m,∇[1])
@@ -37,10 +37,43 @@ Flux.update!(state,m,∇[1])
 
 dd = OneToOne(d,σ) |> gpu
 
-md = encoderlayers(m,d,5)
-dm = encoderlayers(d,m,5)
+md = encoderlayers(m,d,10,σ)
+dm = encoderlayers(d,m,10,σ)
 
+autoencoder = Chain(md,dm) |> gpu
 
+L = @showprogress map(1:epochs) do _
+    map(loader) do (x,y)
+        function loss(f)
+            #E = f[1](x)
+            #D = 1 ./ (euclidean(E) .+ eps(Float32))
+            #G = wak(D)
+            #Ê = (G * E')'
+            #Ŷ = f[2](Ê)
+            Flux.mse(f(x),y)
+        end
+        
+        l = update!(autoencoder,loss,opt)
+        return l
+    end
+end
+p = scatter(1:epochs, (log ∘ mean).(L),
+            xlabel="epoch",ylabel="logMSE",
+            legend=:none)
+savefig(p,"plots/autoencoderloss.pdf")
+
+cc = encoderlayers(d,c,5,σ)
+
+modularity = @showprogress map(1:epochs) do _
+    map(loader) do (x,y)
+        function loss(f)
+            E = autoencoder[1](x)
+            D = 1 ./ (euclidean(E) .+ eps(Float32))
+            C = (softmax ∘ cc)(E)
+            P = C' * C
+            return -softmod(D,P,γ)
+        end
+            
 L = @showprogress map(1:epochs) do _
     map(loader) do (x,y)
         loss = f->Flux.mse(f(x),y)
@@ -49,9 +82,11 @@ L = @showprogress map(1:epochs) do _
     end
 end
 
-dd = OneToOne(d,d,σ)
-dc = Dense(d => c)
-cc = OneToOne(c,c,σ)
+md = Dense(m => m, relu) 
+dm = Dense(m => m, relu)
+dd = OneToOne(m,σ)
+dc = Dense(m => c)
+cc = OneToOne(c,σ)
 
 M = DeePWAK(md,dd,dc,cc,dm) |> gpu
 
@@ -62,6 +97,34 @@ L = @showprogress map(1:epochs) do _
         return l
     end
 end
+p = scatter(1:epochs, (log ∘ mean).(L),
+            xlabel="epoch",ylabel="logMSE",
+            legend=:none)
+savefig(p,"plots/autoencoderloss.pdf")
+
+
+entropy = @showprogress map(1:epochs) do _
+    map(loader) do (x,y)
+        l = update!(M,H,opt)
+        return l
+    end
+end
+p = scatter(1:epochs, mean.(entropy),
+            xlabel="epoch",ylabel="entropy",
+            legend=:none)
+savefig(p,"plots/entropy.pdf")
+
+modularity = @showprogress map(1:epochs) do _
+    map(loader) do (x,y)
+        loss = f->1/softmod(f,x,γ)
+        l = update!(M,loss,opt)
+        return l
+    end
+end
+p = scatter(1:epochs, mean.(modularity),
+            xlabel="epoch",ylabel="modularity",
+            legend=:none)
+savefig(p,"plots/modularity.pdf")
 
 L,entropy,modularity = map(loader) do (x,y)
     train!(m,x,opt,γ)

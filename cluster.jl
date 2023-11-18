@@ -7,6 +7,17 @@ using Leiden
 using ThreadTools
 using JLD2
 
+
+function zfc(X::AbstractMatrix;dims=2)
+    μ = mean(X,dims=dims);
+    X_0 = X .- μ;
+    Σ = cov(X_0,dims=dims);
+    Λ,U = eigen(Σ);
+    W = U * Diagonal(sqrt.(1 ./(Λ .- minimum(Λ) .+ eps(Float32)))) * U';
+    X̃ = W * X;
+    return X̃
+end
+
 function zcat(args...)
     cat(args...,dims=3)
 end
@@ -50,7 +61,7 @@ function ehat(E,D,G)
     (wak(G .* D) * E')'
 end
 
-function 𝕃(X,θ,E,D,G)
+function mse(X,θ,E,D,G)
     Flux.mse(X,(θ ∘ ehat)(E,D,G))
 end
 
@@ -83,6 +94,7 @@ dat = (DataFrame ∘ CSV.File)("data/z_dat.csv",normalizenames=true);
 dat = (scaledat ∘ Matrix)(dat[:,2:end]);
 dat = hcat(filter(x->sum(x) != 0,eachslice(dat,dims=2))...);
 
+X̃ = zfc(dat)
 n,m = size(dat)
 n_Y = Integer(2^round(log2(n) - log2(frac)))
 n_X = n - n_Y

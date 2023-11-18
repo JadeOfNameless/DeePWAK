@@ -82,40 +82,54 @@ function (m::DEWAK)(X::AbstractMatrix)
 end
 
 struct DeePWAK
-    θ
-    ω#::OneToOne
-    ϕ
+    md
+    dd#::OneToOne
+    dc
     #υ::OneToOne
-    ψ
+    dm
 end
 @functor DeePWAK
 
-function embedding(m::DeePWAK,X::AbstractMatrix)
-    return (m.ω ∘ m.θ)(X)
+function getw(M::DeePWAK,X::AbstractMatrix)
+    E = M.md(X)
+    w = (softmax ∘ M.dd)(E)
+    return w
 end
 
-function dist(m::DeePWAK,X::AbstractMatrix)
-    E = embedding(m,X)
+function embedding(M::DeePWAK,X::AbstractMatrix)
+    E = M.md(X)
+    w = (softmax ∘ M.dd)(E)
+    return w .* E
+end
+
+function dist(M::DeePWAK,X::AbstractMatrix)
+    E = embedding(M,X)
     return 1 ./ (euclidean(E) .+ eps(Float32))
 end
 
-function clust(m::DeePWAK,X::AbstractMatrix)
-    E = embedding(m,X)
-    C = (softmax ∘ m.ϕ)(E)
-    return C' * C
+function clust(M::DeePWAK,X::AbstractMatrix)
+    E = embedding(M,X)
+    C = (softmax ∘ M.dc)(E)
+    return C
 end
 
-function g(m::DeePWAK,X::AbstractMatrix)
-    D = dist(m,X)
-    P = clust(m,X)
+function getclusts(M::DeePWAK,X::AbstractMatrix)
+    return map(x->x[1],argmax(clust(M,X),dims=1))
+end
+
+
+function g(M::DeePWAK,X::AbstractMatrix)
+    D = dist(M,X)
+    C = clust(M,X)
+    P = C' * C
     return wak(D .* P)
 end
 
-function(m::DeePWAK)(X::AbstractMatrix)
-    E = embedding(m,X)
-    G = g(m,X)
+function(M::DeePWAK)(X::AbstractMatrix)
+    E = embedding(M,X)
+    G = g(M,X)
     Ê = (G * E')'
-    X̂ = m.ψ(Ê)
+    X̂ = M.dm(Ê)
     return X̂
 end
 
@@ -124,38 +138,79 @@ function H(m::DeePWAK)
     return H_ω
 end
 
-function softmod(m::DeePWAK,X::AbstractMatrix,γ)
-    D = dist(m,X)
-    P = clust(m,X)
+function softmod(M::DeePWAK,X::AbstractMatrix,γ)
+    D = dist(M,X)
+    C = clust(M,X)
+    P = C' * C
     return softmod(D,P,γ)
 end
 
-function loss(m::DeePWAK,X::AbstractArray,α,β,γ)
-    L = mse(m,X)
-    H_m = H(m)
-    calH = softmod(m,X,γ)
-    return L + α * H_m - β * calH
+function stats(M::DeePWAK,X::AbstractArray,γ)
+    L = mse(M,X)
+    w = (softmax ∘ M.dd ∘ M.dm)(X)
+    H_w = (mean ∘ H)(w,dims=2)
+    calH = softmod(M,X,γ)
+    return L,H_w,calH
+end
+
+function loss(M::DeePWAK,X::AbstractArray,γ)
+    #L = mse(M,X)
+    #w = (M.dd ∘ M.dm)(X)
+    #H_w = H(w)
+    #calH = softmod(M,X,γ)
+    L,H_w,calH = stats(M,X,γ)
+    return L * H_w / calH#L + α * H_m - β * calH
 end
 
 function mse(m::Union{Chain,DeePWAK},X::AbstractMatrix)
     return Flux.mse(X,m(X))
 end
     
-function update!(m::Union{Chain,DeePWAK},loss::Function,opt)
+function stats(M::DeePWAK,X::AbstractArray,Y::AbstractArray,γ)
+    L = mse(M,X,Y)
+    w = (softmax ∘ M.dd ∘ M.dm)(X)
+    H_w = (mean ∘ H)(w,dims=2)
+    calH = softmod(M,X,γ)
+    return L,H_w,calH
+end
+
+
+function loss(M::DeePWAK,X::AbstractArray,Y::AbstractArray,γ)
+    #L = mse(M,X)
+    #w = (M.dd ∘ M.dm)(X)
+    #H_w = H(w)
+    #calH = softmod(M,X,γ)
+    L,H_w,calH = stats(M,X,Y,γ)
+    return L * H_w / calH#L + α * H_m - β * calH
+end
+
+function mse(m::Union{Chain,DeePWAK},X::AbstractMatrix,Y::AbstractMatrix)
+    return Flux.mse(Y,m(X))
+end
+    
+function update!(m::Chain,loss::Function,opt)
     state = Flux.setup(opt,m)
     l,∇ = Flux.withgradient(loss,m)
     Flux.update!(state,m,∇[1])
     return l
 end
 
-function train!(m::DeePWAK,X::AbstractMatrix,opt,γ)
-    l = update!(m,θ->mse(θ,X),opt)
-    entropy = update!(m,H,opt)
-    modularity = update!(m,θ->1/softmod(θ,X,γ),opt)
+function update!(M::DeePWAK,loss::Function,opt)
+    #state = Flux.setup(opt,m)
+    l,∇ = Flux.withgradient(loss,M)
+    Flux.update!(state,M,∇[1])
+    return l
+end
+
+function train!(M::DeePWAK,X::AbstractMatrix,opt,γ)
+    l,entropy,modularity = stats(M,X,γ)
+    update!(m,θ->loss(θ,X),opt)
+    #entropy = update!(m,H,opt)
+    #modularity = update!(m,θ->1/softmod(θ,X,γ),opt)
     return l, entropy, modularity
 end
 
-function trainencoder!(m::DeePWAK,X::AbstractMatrix,opt)
+#function trainencoder!(m::DeePWAK,X::AbstractMatrix,opt)
     
     
 

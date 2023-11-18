@@ -2,22 +2,6 @@
   src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
   type="text/javascript">
 </script>
-$$
-\def\txtop#1{\mathop{\mathrm{#1}}\limits}
-\def\argmin{\txtop{argmin}}
-\def\MSE{\txtop{MSE}}
-\def\ntos{\txtop{noise2self}}
-\def\PCA{\txtop{PCA}}
-\def\kNN{\txtop{kNN}}
-\def\WAK{\txtop{WAK}}
-\def\leiden{\txtop{leiden}}
-\def\rdim{\txtop{reducedimension}}
-\def\softmax{\txtop{softmax}}
-\def\layernorm{\txtop{layernorm}}
-\def\DEWAK{\txtop{DEWAK}}
-\def\DEPWAK{\txtop{DEPWAK}}
-\def\DeePWAK{\txtop{DeePWAK}}
-$$
 
 # DeePWAK
 Self-supervised model selection using Deep learning of a Partitioned Weighted Affinity Kernel.
@@ -55,3 +39,9 @@ julia cluster.jl
 # generate plots and characterize optimal clusterings
 Rscript plot.clust.R
 ```
+
+# Rationale
+DeePWAK attempts to generalize [a pipeline for automatic phenotype detection in microscopy images](https://github.com/ChristiaenLab/CrobustaScreen). 
+
+# Overview
+![overview](https://github.com/kewiechecki/DeePWAK/blob/master/tikz/optimization/optimization.pdf?raw=true)
