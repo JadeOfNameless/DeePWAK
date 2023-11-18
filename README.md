@@ -105,7 +105,7 @@ m = \frac{1}{n}\sum_i^n\sum_j^nG_{i,j}
 $$
 
 $$
-\mathcal{H}(PG) = \frac{1}{2m}\sum_{i=1}^n\sum_{j=1}^n(PG)_{i,j} - \frac{(PG^\top)_{i,j}^2}{2m}
+\mathcal{H}(PG) = \frac{1}{2m}\sum\_{i=1}^n\sum\_{j=1}^n(PG)\_{i,j} - \frac{(PG^\top)\_{i,j}^2}{2m}
 $$
 
 $$
