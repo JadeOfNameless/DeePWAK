@@ -50,7 +50,7 @@ Its objective function is based on [noise2self](https://arxiv.org/abs/1901.11365
 Let $J \in \mathcal{J}$ be independent partitions of noisy data $X$. Let $\mathcal{F}(\theta)$ be a family of predictors of $X_J$ with parameters $\theta \in \Theta$ that depends on its complement $X_{J^C}$
 
 $$
-  \hat{X}_J = \mathcal{F}(\theta)(X_{J^C})
+  \hat{X}
 $$
 
   The optimal $\theta$ is given by
