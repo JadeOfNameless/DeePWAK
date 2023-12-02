@@ -100,3 +100,14 @@ function 𝕃_dk(X,θ,E,D,𝐆)
         return 𝕃(X,θ[2],E,D,G)
     end
 end
+
+
+function zfc(X::AbstractMatrix;dims=2)
+    μ = mean(X,dims=dims);
+    X_0 = X .- μ;
+    Σ = cov(X_0,dims=dims);
+    Λ,U = eigen(Σ);
+    W = U * Diagonal(sqrt.(1 ./(Λ .- minimum(Λ) .+ eps(Float32)))) * U';
+    X̃ = W * X;
+    return X̃
+end

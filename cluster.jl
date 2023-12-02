@@ -7,6 +7,7 @@ using Leiden
 using ThreadTools
 using JLD2
 
+include("julia/fns.jl")
 
 function zfc(X::AbstractMatrix;dims=2)
     μ = mean(X,dims=dims);
@@ -17,72 +18,6 @@ function zfc(X::AbstractMatrix;dims=2)
     X̃ = W * X;
     return X̃
 end
-
-function zcat(args...)
-    cat(args...,dims=3)
-end
-
-function mapmap(f,args...)
-    map((args...)->map(f,args...),args...)
-end
-
-function tmapmap(f,args...)
-    tmap((args...)->map(f,args...),args...)
-end
-
-function tmapreduce(f,rf,args...)
-    rf(tmap(f,args...)...)
-end
-
-function scaledat(X::AbstractArray,dims=1)
-    Y = X ./ maximum(abs.(X),dims=dims)
-    Y[isnan.(Y)] .= 0
-    return Y
-end
-
-function sampledat(X::AbstractArray,k)
-    _,n = size(X)
-    sel = sample(1:n,k,replace=false)
-    test = X[:,sel]
-    train = X[:,Not(sel)]
-    return test,train
-end
-
-function wak(G)
-    #Matrix -> Matrix
-    #returns G with row sums normalized to 1
-    W = sum(G,dims=2)
-    K = G ./ W
-    K[isnan.(K)] .= 0
-    return K
-end
-
-function ehat(E,D,G)
-    (wak(G .* D) * E')'
-end
-
-function mse(X,θ,E,D,G)
-    Flux.mse(X,(θ ∘ ehat)(E,D,G))
-end
-
-function partitionmat(C)
-    (sum ∘ map)(1:maximum(C)) do c
-        x = C .== c
-        return x * x'
-    end
-end
-
-function diffuse(X,θ,E,D,G,P,d)
-    M = P .* G
-    M = wak(M .* D)
-    foldl(1:d,init=(M,[])) do (M⁺,L),_
-        M⁺ = M⁺ * M
-        L⁺ = Flux.mse(X,θ((M⁺ * E')'))
-        L = vcat(L,L⁺)
-        return M⁺,L
-    end
-end
-
 frac = 10
 b = 32
 bfŋ = 1:32
@@ -91,11 +26,19 @@ bfŋ = 1:32
 𝐝 = 128
 
 dat = (DataFrame ∘ CSV.File)("data/z_dat.csv",normalizenames=true);
-dat = (scaledat ∘ Matrix)(dat[:,2:end]);
-dat = hcat(filter(x->sum(x) != 0,eachslice(dat,dims=2))...);
+dat = Matrix(dat[:,2:end]);
+#dat = (scaledat ∘ Matrix)(dat[:,2:end]);
+X = hcat(filter(x->sum(x) != 0,eachslice(dat,dims=2))...);
 
-X̃ = zfc(dat)
-n,m = size(dat)
+#X̃ = zfc(dat)
+μ = mean(X,dims=2);
+X_0 = X .- μ;
+Σ = cov(X_0,dims=2);
+Λ,U = eigen(Σ);
+W = U * Diagonal(sqrt.(1 ./(Λ .- minimum(Λ) .+ eps(Float32)))) * U';
+X̃ = W * X;
+
+n,m = size(X)
 n_Y = Integer(2^round(log2(n) - log2(frac)))
 n_X = n - n_Y
 
