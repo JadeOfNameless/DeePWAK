@@ -1,11 +1,11 @@
 include("julia/LayerTypes.jl")
 include("julia/LayerFns.jl")
 
-epochs = 100
+epochs = 100000
 d = 100
 c = 100
-η = 0.01
-λ = 0.0
+η = 0.001
+λ = 0.001
 batchsize=1024
 
 α = 0.1

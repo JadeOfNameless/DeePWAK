@@ -8,6 +8,8 @@ struct OneToOne
 end
 @functor OneToOne (weight,bias)
 
+# m:Int -> f:(Float -> Float) -> OneToOne m f
+# OneToOne constructor
 function OneToOne(d::Integer, σ = identity)
     #weight = randn(Float32, d)
     weight = ones(Float32, d)
@@ -15,10 +17,13 @@ function OneToOne(d::Integer, σ = identity)
     return OneToOne(weight, bias, σ)
 end
 
+# ∀ n:Int ∃ m:Int -> [Float m n] -> [Float m n]
+# OneToOne application
 function (l::OneToOne)(x)
     return l.σ(l.weight .* x .+ l.bias)
 end
 
+# ∀ m,n:Int f:(Float -> Float)  -> g:(OneToOne m f) -> A:[Float m n] -> (g A, ∇ g A)
 function Zygote.pullback(l::OneToOne, x::AbstractArray)
     y = l.weight .* x .+ l.bias
     z = l.σ(y)
@@ -81,43 +86,96 @@ function (m::DEWAK)(X::AbstractMatrix)
     return X̂
 end
 
-struct DeePWAK
-    md
-    dd#::OneToOne
-    dc
-    #υ::OneToOne
-    dm
+struct WeightNetwork
+    l::Chain
 end
-@functor DeePWAK
+@functor WeightNetwork
 
-function getw(M::DeePWAK,X::AbstractMatrix)
-    E = M.md(X)
-    w = (softmax ∘ M.dd)(E)
-    return w
+# ∀ n:Int ∃ m:Int -> [Float m n] -> [Float m n]
+function (m::WeightNetwork)(X::AbstractMatrix)
+    return (softmax ∘ m.l)(X)
 end
 
-function embedding(M::DeePWAK,X::AbstractMatrix)
-    E = M.md(X)
-    w = (softmax ∘ M.dd)(E)
+struct WeightedEncoder
+    encoder::Chain
+    weigher::WeightNetwork
+end
+@functor WeightedEncoder
+
+# ∀ n:Int ∃ m:Int -> [Float m n] -> [Float m n]
+function (M::WeightedEncoder)(X::AbstractMatrix)
+    E = M.encoder(X)
+    w = M.weigher(E)
     return w .* E
 end
 
-function dist(M::DeePWAK,X::AbstractMatrix)
-    E = embedding(M,X)
-    return 1 ./ (euclidean(E) .+ eps(Float32))
+struct ClustNetwork
+    l::Chain
 end
+@functor ClustNetwork
 
-function clust(M::DeePWAK,X::AbstractMatrix)
-    E = embedding(M,X)
-    C = (softmax ∘ M.dc)(E)
+# ∀ n:Int ∃ m,c:Int -> [Float m n] -> [Float c n]
+function (m::ClustNetwork)(X::AbstractMatrix)
+    C = (softmax ∘ m.l)(X)
     return C
 end
 
+struct DeePWAK
+    encoder::WeightedEncoder
+    partitioner::ClustNetwork
+    decoder::Chain
+    metric::Function
+end
+@functor DeePWAK (encoder,partitioner,decoder)
+
+# ∀ n:Int ∃ m:Int -> [[Float]]{m,n} -> [[Float]]{m,n}
+function (m::DeePWAK)(X::AbstractMatrix)
+    #w = (softmax ∘ m.weigher)(X)
+    #E = w .* m.encoder(X)
+    E = m.encoder(X)
+    D = m.metric(E)
+    C = m.partitioner(E)
+    P = C' * C
+    G = wak(D .* P)
+    Ehat = (G * E')'
+    return m.decoder(Ehat)
+end
+
+#∀ n:Int ∃ m,d,c:Int -> DeePWAK m d c -> [Float m n] -> [Float d n]
+function getw(M::DeePWAK,X::AbstractMatrix)
+    #E = M.encoder(X)
+    #w = (softmax ∘ M.weigher)(E)
+    return M.encoder.weigher(X)
+end
+
+#∀ n:Int ∃ m,d,c:Int -> DeePWAK m d c -> [Float m n] -> [Float d n]
+function embedding(M::DeePWAK,X::AbstractMatrix)
+    E = M.encoder(X)
+    w = (softmax ∘ M.weigher)(E)
+    return w .* E
+end
+
+#∀ n:Int ∃ m,d,c:Int -> DeePWAK m d c -> [Float m n] -> [Float n n]
+function dist(M::DeePWAK,X::AbstractMatrix)
+    E = M.encoder(X)
+    #return 1 ./ (euclidean(E) .+ eps(Float32))
+    return M.metric(E)
+end
+
+#∀ n:Int ∃ m,d,c:Int -> DeePWAK m d c -> [Float m n] -> [Float c n]
+function clust(M::DeePWAK,X::AbstractMatrix)
+    E = embedding(M,X)
+    C = (softmax ∘ M.partitioner)(E)
+    return C
+end
+
+#∀ n:Int ∃ m,d,c:Int -> DeePWAK m d c -> [Float m n] -> [Float n]
 function getclusts(M::DeePWAK,X::AbstractMatrix)
     return map(x->x[1],argmax(clust(M,X),dims=1))
 end
 
 
+#∀ n:Int ∃ m,d,c:Int -> DeePWAK m d c -> [Float m n] -> [Float n n]
 function g(M::DeePWAK,X::AbstractMatrix)
     D = dist(M,X)
     C = clust(M,X)
@@ -125,6 +183,7 @@ function g(M::DeePWAK,X::AbstractMatrix)
     return wak(D .* P)
 end
 
+# ∀ n:Int ∃ m,d,c:Int -> DeePWAK m d c -> [Float m n] -> [Float m n]
 function(M::DeePWAK)(X::AbstractMatrix)
     E = embedding(M,X)
     G = g(M,X)
@@ -133,11 +192,13 @@ function(M::DeePWAK)(X::AbstractMatrix)
     return X̂
 end
 
+# ∀ m,d,c:Int -> DeePWAK m d c -> Float
 function H(m::DeePWAK)
     H_ω = (mean ∘ H)(m.ω.weight)
     return H_ω
 end
 
+# ∀ n:Int ∃ m,d,c:Int -> DeePWAK m d c -> [Float m n] -> Float -> Float
 function softmod(M::DeePWAK,X::AbstractMatrix,γ)
     D = dist(M,X)
     C = clust(M,X)
@@ -188,7 +249,8 @@ function mse(m::Union{Chain,DeePWAK},X::AbstractMatrix,Y::AbstractMatrix)
     return Flux.mse(Y,m(X))
 end
     
-function update!(m::Chain,loss::Function,opt)
+function update!(m::Union{Chain,ClustNetwork,WeightNetwork,WeightedEncoder},
+                 loss::Function,opt)
     state = Flux.setup(opt,m)
     l,∇ = Flux.withgradient(loss,m)
     Flux.update!(state,m,∇[1])
@@ -196,7 +258,7 @@ function update!(m::Chain,loss::Function,opt)
 end
 
 function update!(M::DeePWAK,loss::Function,opt)
-    #state = Flux.setup(opt,m)
+    state = Flux.setup(opt,M)
     l,∇ = Flux.withgradient(loss,M)
     Flux.update!(state,M,∇[1])
     return l
