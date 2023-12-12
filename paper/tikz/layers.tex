@@ -1,0 +1,34 @@
+\begin{tikzpicture}[
+    node distance = 5mm and 5mm,
+    punkt/.style = {rectangle, draw},
+    pil/.style = {black, -stealth},
+    font=\small
+    ]
+
+  \node[punkt,label=above:encoder] (e1) {$\tanhl^{112 \to 58}$} ;
+  \node[punkt] (e2) [below=of e1] {$\tanhl^{58 \to 29}$} ;
+  \node[punkt] (e3) [below=of e2] {$\tanhl^{29 \to 14}$} ;
+
+  \node[punkt,label=above:partitioner] (p1) [right=of e1] {$\linear^{112 \to 448}$} ;
+  \node[punkt] (p2) [below=of p1] {$\sigmoid^{448 \to 448}$} ;
+  \node[punkt] (p3) [below=of p2] {$\sigmoid^{448 \to 448}$} ;
+  \node[punkt] (p4) [below=of p3] {$\sigmoid^{448 \to 448}$} ;
+  \node[punkt] (p5) [below=of p4] {$\linear^{448 \to 14}$} ;
+
+  \node[punkt,label=above:decoder] (d1) [right=of p1] {$\tanhl^{14 \to 29}$} ;
+  \node[punkt] (d2) [below=of d1] {$\tanhl^{29 \to 58}$} ;
+  \node[punkt] (d3) [below=of d2] {$\tanhl^{58 \to 112}$} ;
+
+  \draw[pil] 
+  (e1) edge (e2)
+  (e2) edge (e3)
+
+  (p1) edge (p2)
+  (p2)edge (p3)
+  (p3) edge (p4)
+  (p4) edge (p5)
+
+  (d1) edge (d2)
+  (d2) edge (d3);
+
+\end{tikzpicture}

@@ -1,0 +1,46 @@
+\begin{tikzpicture}[
+    node distance = 5mm and 5mm,
+    punkt/.style = {rectangle, draw},
+    pil/.style = {black, -stealth},
+    font=\small
+    ]
+
+  \node[] (X) {$X$} ;
+  \node[punkt] (b1) [below=of X] {DeePWAKBlock} ;
+  \node[] (R1) [below=of b1] {$R_1$} ;
+  \node[] (diff1) [right=of R1] {$\ominus$} ;
+
+  \node[punkt] (b2) [below=of diff1] {DeePWAKBlock} ;
+  \node[] (R2) [below=of b2] {$R_2$} ;
+  \node[] (diff2) [right=of R2] {$\ominus$} ;
+  
+  \node[punkt] (b3) [below=of diff2] {DeePWAKBlock} ;
+  \node[] (R3) [below=of b3] {$R_3$} ;
+  %\node[] (diff3) [right=of R3] {$\ominus$} ;
+  
+  \node[punkt] (sum) [left=of R3] {$\sum$} ;
+  \node[] (Xhat) [below=of sum] {$\hat{X}$} ;
+
+  \draw[pil]
+  (X) edge (b1)
+  (b1) edge (R1)
+  (R1) edge (diff1)
+  (X) edge[bend left=30] (diff1)
+
+  (diff1) edge (b2)
+  (b2) edge (R2)
+  (R2) edge (diff2)
+  (diff1) edge[bend left=30] (diff2)
+  
+  (diff2) edge (b3)
+  (b3) edge (R3)
+  %(R3) edge (diff3)
+  %(diff2) edge[bend left=30] (diff3)
+
+  (R1) edge[bend right=30] (sum)
+  (R2) edge[bend right=15] (sum)
+  (R3) edge (sum)
+  (sum) edge (Xhat) ;
+\end{tikzpicture}
+
+  

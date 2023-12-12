@@ -25,6 +25,7 @@ d = 14
 c = 14
 l_e = [m,58,29,d]
 l_p = 5
+h = 5
 
 frac = 10
 n_test = Integer(2^round(log2(n) - log2(frac)))
@@ -45,7 +46,7 @@ L_train,L_test = train!(M,loader,opt,test,epochs*10)
 O = Parallel(+,map(_->DeePWAK(mlp(l_e,tanh),
                                   Chain(mlp4x(m,c,l_p),softmax),
                                   mlp(reverse(l_e),tanh)),
-                       1:5)...) |> gpu
+                       1:h)...) |> gpu
 
 L_Otrain,L_Otest = train!(O,loader,opt,test,epochs)
 
@@ -56,4 +57,15 @@ C = mapreduce(vcat,O.layers) do M
     return (clusts ∘ M.partitioner)(X)
 end
 
-Tables.table(C') |> CSV.write("clusts.csv")
+Tables.table(C') |> CSV.write("data/clusts.csv")
+
+map(O.layers,1:h) do M,i
+    E = M.encoder(X)
+    Tables.table(E') |> CSV.write("data/embedding/$i.csv")
+end
+
+map(O.layers,1:h) do M,i
+    C = M.partitioner(X)
+    Tables.table(C') |> CSV.write("data/clust/$i.csv")
+end
+

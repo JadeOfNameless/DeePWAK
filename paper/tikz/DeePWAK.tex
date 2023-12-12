@@ -1,0 +1,48 @@
+\begin{tikzpicture}[
+    node distance = 5mm and 5mm,
+    punkt/.style = {rectangle, draw},
+    pil/.style = {black, -stealth},
+    font=\small
+    ]
+
+  %\node[punkt] (preprocessing) {preprocessing} ;
+  \node[] (X) {$X^{m \times n}$} ;
+  \node[punkt] (encoder) [below=of X] {$\encoder^{m \to d}$} ;
+  \node[] (E) [below=of encoder] {$E^{d \times n}$} ;
+  \node[punkt] (Etranspose) [below=of E] {transpose} ;
+
+  \node[punkt] (partitioner) [left=of encoder] {$\partitioner^{m \to c}$} ;
+  \node[punkt] (softmax) [below=of partitioner] {$\softmax$} ;
+
+  \node[] (C) [below=of softmax] {$C^{c \times n}$} ;
+  \node[punkt] (Ctranspose) [left=of C] {transpose} ;
+  \node[punkt] (CC) [below=of Ctranspose] {matmul} ;
+  \node[] (P) [below=of CC] {$P^{n \times n}$} ;
+  \node[punkt] (wak) [right=of P] {WAK} ;
+  \node[punkt] (GE) [right=of wak] {matmul} ;
+  \node[] (Ehat) [below=of GE] {$\hat{E}^{d \times n}$} ;
+
+  \node[punkt] (decoder) [left=of Ehat] {$\decoder^{d \to m}$} ;
+  \node[] (Xhat) [left=of decoder] {$\hat{X}^{m \times n}$} ;
+
+  \draw[pil] %(preprocessing) edge (X)
+  (X) edge (encoder)
+  (encoder) edge (E)
+  (E) edge (Etranspose)
+  (Etranspose) edge (GE)
+  
+  (X) edge (partitioner)
+  (partitioner) edge (softmax)
+  (softmax) edge (C)
+  (C) edge (Ctranspose)
+  (Ctranspose) edge (CC)
+  (C) edge (CC)
+  (CC) edge (P)
+  (P) edge (wak)
+  (wak) edge (GE)
+  (GE) edge (Ehat)
+
+  (Ehat) edge (decoder)
+  (decoder) edge (Xhat);
+\end{tikzpicture}
+
