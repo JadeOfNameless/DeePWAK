@@ -1,0 +1,13 @@
+"","parameter","condition","4","8"
+"TVC.division1","TVC.division","enhanced",2,7
+"TVC.division2","TVC.division","inhibited",48,392
+"TVC.division3","TVC.division","WT",604,778
+"TVC.migration1","TVC.migration","inhibited",16,136
+"TVC.migration2","TVC.migration","WT",638,1041
+"ATM.division1","ATM.division","enhanced",27,180
+"ATM.division2","ATM.division","WT",627,997
+"ATM.migration1","ATM.migration","enhanced",52,238
+"ATM.migration2","ATM.migration","WT",602,939
+"other1","other","TVC alignment",134,86
+"other2","other","TVC disposition",14,13
+"other3","other","WT",506,1078

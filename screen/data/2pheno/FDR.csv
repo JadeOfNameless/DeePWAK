@@ -1,0 +1,13 @@
+"","parameter","condition","8","11"
+"TVC.division1","TVC.division","enhanced",0.247174885539825,0.585048766506933
+"TVC.division2","TVC.division","inhibited",0.518683096632523,0.592543870742911
+"TVC.division3","TVC.division","WT",0.518683096632523,0.585048766506933
+"TVC.migration1","TVC.migration","inhibited",1.28417606774506e-08,1.90804754789578e-08
+"TVC.migration2","TVC.migration","WT",1.90804754789578e-08,1.28417606774507e-08
+"ATM.division1","ATM.division","enhanced",0.154897982482181,0.154897982482181
+"ATM.division2","ATM.division","WT",0.154897982482181,0.154897982482181
+"ATM.migration1","ATM.migration","enhanced",1.81659739862883e-31,7.30797638766974e-32
+"ATM.migration2","ATM.migration","WT",7.30797638766974e-32,1.81659739862884e-31
+"other1","other","TVC alignment",2.56726598748309e-05,2.64881229420306e-05
+"other2","other","TVC disposition",0.836887767754324,0.552987104421359
+"other3","other","WT",2.56726598748309e-05,3.49055724328397e-05

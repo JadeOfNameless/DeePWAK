@@ -1,0 +1,44 @@
+\begin{tikzpicture}[
+    node distance = 5mm and 5mm,
+    punkt/.style = {rectangle, draw},
+    pil/.style = {black, -stealth},
+    font=\small
+    ]
+
+  %\node[punkt] (preprocessing) {preprocessing} ;
+  \node[] (X) {$X$} ;
+
+  \node[punkt] (h3) [right=of X] {$\partitioner$} ;
+  \node[punkt] (h2) [above=of h3] {$\partitioner$} ;
+  \node[punkt] (h1) [above=of h2] {$\partitioner$} ;
+  \node[punkt] (h4) [below=of h3] {$\partitioner$} ;
+  \node[punkt] (h5) [below=of h4] {$\partitioner$} ;
+
+  \node[] (concat) [right=of h3] {$\oplus$} ;
+
+  \node[punkt] (linear) [right=of concat] {consensus partitioner} ;
+  \node[punkt] (softmax) [below=of linear] {softmax};
+  \node[] (Xhat) [below=of softmax] {$C_c$} ;
+
+  
+  \draw[pil] %(preprocessing) edge (X)
+
+  (X) edge[bend left=30] (h1)
+  (X) edge[bend left=30] (h2)
+  (X) edge (h3)
+  (X) edge[bend right=30] (h4)
+  (X) edge[bend right=30] (h5)
+
+  (h1) edge[bend left=30] (concat)
+  (h2) edge[bend left=30] (concat)
+  (h3) edge (concat)
+  (h4) edge[bend right=30] (concat)
+  (h5) edge[bend right=30] (concat)
+
+  (concat) edge (linear)
+  (linear) edge (softmax)
+  (softmax) edge (Xhat) ;
+
+\end{tikzpicture}
+
+  

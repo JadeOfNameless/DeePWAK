@@ -1,0 +1,25 @@
+\begin{tikzpicture}[
+    node distance = 5mm and 5mm,
+    punkt/.style = {rectangle, draw},
+    pil/.style = {black, -stealth},
+    font=\small
+    ]
+
+  \node[punkt,label=above:consensus encoder] (e1) {$\tanhl^{70 \to 35}$} ;
+  \node[punkt] (e2) [below=of e1] {$\tanhl^{35 \to 14}$} ;
+
+  \node[punkt,label=above:consensus partitioner] (p1) [right=of e1] {$\linear^{70 \to 280}$} ;
+  \node[punkt] (p2) [below=of p1] {$\sigmoid^{280 \to 280}$} ;
+  \node[punkt] (p3) [below=of p2] {$\sigmoid^{280 \to 280}$} ;
+  \node[punkt] (p4) [below=of p3] {$\sigmoid^{280 \to 280}$} ;
+  \node[punkt] (p5) [below=of p4] {$\linear^{280 \to 14}$} ;
+
+  \draw[pil] 
+  (e1) edge (e2)
+
+  (p1) edge (p2)
+  (p2)edge (p3)
+  (p3) edge (p4)
+  (p4) edge (p5);
+
+\end{tikzpicture}

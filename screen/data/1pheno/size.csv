@@ -1,0 +1,13 @@
+"","parameter","condition","1","2","3","5","6","7","8","9","11","12","13","14"
+"TVC.division1","TVC.division","enhanced",0,0,2,2,0,0,0,1,1,0,0,3
+"TVC.division2","TVC.division","inhibited",17,2,25,40,17,47,1,82,95,6,89,19
+"TVC.division3","TVC.division","WT",52,2,135,248,37,73,3,152,179,20,251,230
+"TVC.migration1","TVC.migration","inhibited",8,0,5,20,7,22,0,40,21,2,21,6
+"TVC.migration2","TVC.migration","WT",61,4,157,270,47,98,4,195,254,24,319,246
+"ATM.division1","ATM.division","enhanced",7,1,1,26,3,17,0,68,42,4,30,8
+"ATM.division2","ATM.division","WT",62,3,161,264,51,103,4,167,233,22,310,244
+"ATM.migration1","ATM.migration","enhanced",4,2,1,39,2,14,0,113,78,5,21,11
+"ATM.migration2","ATM.migration","WT",65,2,161,251,52,106,4,122,197,21,319,241
+"other1","other","TVC alignment",5,0,23,76,1,11,0,22,10,3,13,56
+"other2","other","TVC disposition",2,0,0,9,2,2,0,5,0,1,2,4
+"other3","other","WT",62,4,139,205,51,107,4,208,265,22,325,192
