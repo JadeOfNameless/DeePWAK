@@ -18,8 +18,9 @@
   \node[] (R3) [below=of b3] {$R_3$} ;
   %\node[] (diff3) [right=of R3] {$\ominus$} ;
   
-  \node[punkt] (sum) [left=of R3] {$\sum$} ;
-  \node[] (Xhat) [below=of sum] {$\hat{X}$} ;
+  \node[] (concat) [left=of R3] {$\oplus$} ;
+  \node[punkt] (linear) [left=of concat] {$\linear^{3m \to m}$} ;
+  \node[] (Xhat) [below=of linear] {$\hat{X}$} ;
 
   \draw[pil]
   (X) edge (b1)
@@ -37,10 +38,10 @@
   %(R3) edge (diff3)
   %(diff2) edge[bend left=30] (diff3)
 
-  (R1) edge[bend right=30] (sum)
-  (R2) edge[bend right=15] (sum)
-  (R3) edge (sum)
-  (sum) edge (Xhat) ;
+  (R1) edge[bend right=30] (concat)
+  (R2) edge[bend right=15] (concat)
+  (R3) edge (concat)
+  (concat) edge (Xhat) ;
 \end{tikzpicture}
 
   

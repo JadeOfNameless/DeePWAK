@@ -20,8 +20,10 @@
   %\node[] (Xhat4) [below=of h4] {$\hat{X}_4$} ;
   %\node[] (Xhat5) [below=of h5] {$\hat{X}_5$} ;
 
-  \node[punkt] (sum) [right=of h3] {$\sum$} ;
-  \node[] (Xhat) [right=of sum] {$\hat{X}$} ;
+  %\node[punkt] (sum) [right=of h3] {$\sum$} ;
+  \node[] (concat) [right=of h3] {$\oplus$} ;
+  \node[punkt] (linear) [right=of concat] {$\linear^{5m \to m}$} ;
+  \node[] (Xhat) [right=of linear] {$\hat{X}$} ;
   %\node[punkt] (loss) [below=of h5] {MSE} ;
   %\node[] (grad) [right=of loss] {$\nabla$} ;
   %\node[punkt] (update) [right=of grad] {$\mathrm{update!}(\theta,\pi,\phi)$} ;
@@ -34,13 +36,14 @@
   (X) edge[bend right=30] (h4)
   (X) edge[bend right=30] (h5)
 
-  (h1) edge[bend left=30] (sum)
-  (h2) edge[bend left=30] (sum)
-  (h3) edge (sum)
-  (h4) edge[bend right=30] (sum)
-  (h5) edge[bend right=30] (sum)
+  (h1) edge[bend left=30] (concat)
+  (h2) edge[bend left=30] (concat)
+  (h3) edge (concat)
+  (h4) edge[bend right=30] (concat)
+  (h5) edge[bend right=30] (concat)
 
-  (sum) edge (Xhat) ;
+  (concat) edge (linear)
+  (linear) edge (Xhat) ;
   %(sum) edge[bend left=15] (Xhat) ;
   %(Xhat) edge[bend left=15] (loss) 
   %(X) edge[bend right=30] (loss)

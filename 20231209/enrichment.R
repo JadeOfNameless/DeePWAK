@@ -133,27 +133,21 @@ odds <- do.call(cbind,odds)
 fdr <- do.call(cbind,hyperattr(hyper,'FDR'))
 qval <- do.call(cbind,hyperattr(hyper,'q'))
 
-	# split phenotype & condition into separate panels
-	rowsplit <- unlist(
-		mapply(
-		       function(x,y) rep(y,nrow(x$log2OR)),
-		       hyper[[1]],
-		       names(hyper[[1]])
-		)
-	)
+# split phenotype & condition into separate panels
+rowsplit <- unlist(mapply(function(x,y) rep(y,nrow(x$log2OR)),
+                hyper[[1]],
+                names(hyper[[1]])))
 
-		dotPscale(
-			as.matrix(odds), 
-			as.matrix(fdr), 
-			as.matrix(qval), 
-			file='phenotype', 
-			path='data', 
-			row_split=rowsplit, 
-                    column_split=csplit,
-                    row_title_rot=0,
-                    column_title_rot=90
-		)
-                
+dotPscale(as.matrix(odds), 
+        as.matrix(fdr), 
+        as.matrix(qval), 
+        file='phenotype', 
+        path='data', 
+        row_split=rowsplit, 
+    column_split=csplit,
+    row_title_rot=0,
+    column_title_rot=90)
+
 clusthyper <- function(dat, clusts, out){
 	require(moreComplexHeatmap)
 	# run hypergeometric tests for enrichment of conditions and phenotypes

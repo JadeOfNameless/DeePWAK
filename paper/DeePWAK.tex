@@ -38,10 +38,11 @@
 \newcommand{\encoder}{\txtop{encoder}}
 \newcommand{\decoder}{\txtop{decoder}}
 \newcommand{\partitioner}{\txtop{partitioner}}
+\newcommand{\function}{\txtop{function}}
 
 \date{\today}
 
-\title{DeePWAK: Clustering \& Denoising Intertwined}
+\title{DeePWAK: Sparse Ensemble Clustering using Denoising}
 
 \author{Keira Wiechecki \\
   Center for Genomics \& Systems Biology \\
@@ -60,7 +61,16 @@ Here we introduce Denoising by Deep learning of a Partitoned Weighted Affinity K
 \end{abstract}
 
 \section{Introduction}
-Though the applications of deep learning to classification is well established,
+Though applications of deep learning to classification is well established, self-supervised classification has been much less thoroghly explored.
+Deep clustering is an active area of research\cite{ren2022deep}.
+Similarly to DeepCluE\cite{huang2023deepclue}, we use an ensemble clustering method.
+But rather than creating a single consensus partition, we aim to maximise independence between submodels.
+%A common pretraining method is contrastive clustering\cite{li2020contrastive}.
+%This is a method of self-supervised feature detection consisting of generating synthetic pairs of data by applying various image transformations.
+
+Our approach uses what we believe to be a previously unexplored combination of an information bottleneck with self-supervised denoising.
+Like ClAM\cite{saha2023endtoend} it is end-to-end differentiable.
+Unlike ClAM,
 
 \subsection{noise2self}
 
@@ -99,8 +109,10 @@ Let $C^{c \times n}$ be a matrix representing a clustering of $n$ points into $c
   P := C^\top C
 \end{equation}
 
+Informally, this can be equated to position-independent attention with data points as tokens and the batch size as the context window.
+
 \section{Notation}
-Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality. A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters. Capital Greek letters indicate parameter spaces. For parameters $\theta$, $\theta^{m \to d}$ indicates parameters for a model that accepts an input of dimension $m$ and returns an output of dimension $d$.
+Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality. A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters. Capital Greek letters indicate parameter spaces. For parameters $\theta$, $\theta^{m \to d}$ indicates parameters for a model that accepts an input of dimension $m$ and returns an output of dimension $d$. $\function^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\function$.
 
 \section{Architecture}
 
@@ -111,6 +123,8 @@ The DeePWAK constructor has the type signature
 \end{equation}
 
 It consists of an encoder, partitioner, and decoder.
+
+The architecture is inspired by dot product attention, but has a few key differences. Because it is position-independent, $Q$ and $K$ are simply transposes of each other. Each head has a separate encoder and decoder. 
 
 \begin{algorithm}
   \caption{DeePWAK constructor}\label{alg:cap}
@@ -141,36 +155,59 @@ It consists of an encoder, partitioner, and decoder.
 \subsection{Multihead DeePWAK}
 
 \section{A concrete example from microscopy data}
+Tools for imaging 
+DEWAKSS is poorly suited to 
 
-\begin{figure}[ht]
-     \begin{subfigure}[t]{0.10\textwidth}
+\begin{figure}
+  \includegraphics[width=\textwidth]{params.pdf}
+    \caption{Microscopy data after preprocessing. }
+    \label{fig:}
+\end{figure}
+  
+\begin{figure}
+     \begin{subfigure}[b]{0.5\textwidth}
         \input{tikz/layers.tex}
          \caption{}
          \label{fig:}
      \end{subfigure}
-
      \hfill
-     \begin{subfigure}[t]{0.10\textwidth}
+     \begin{subfigure}[b]{0.5\textwidth}
         \input{tikz/DeePWAK.tex}
          \caption{}
          \label{fig:}
      \end{subfigure}
-     
+
      \vspace{1cm}
-     \begin{subfigure}[t]{0.10\textwidth}
+     \begin{subfigure}[b]{0.5\textwidth}
         \input{tikz/DeePWAKBlock.tex}
          \caption{}
          \label{fig:}
      \end{subfigure}
-
      \hfill
-     \begin{subfigure}[t]{0.10\textwidth}
-       \input{tikz/ontologizer.tex}
+     \begin{subfigure}[b]{\textwidth}
+       \input{tikz/consensuslayers.tex}
        \caption{}
        \label{fig:}
      \end{subfigure}
      
-     \caption{(a) Architecture of one DeePWAK head. (b) Training loop for DeePWAK block.}
+
+     \vspace{1cm}
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/consensusencoder.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{\textwidth}
+       \input{tikz/consensus.tex}
+       \caption{}
+       \label{fig:}
+     \end{subfigure}
+     \caption{(a) Architectures of encoder, partitioner, and decoder.
+       (b) Architecture of one DeePWAK head.
+       (c) Architecture of one DeePWAK block.
+       (d) Architectures of pooled encoder and pooled clusterer.
+       (e,f) Calculation of consensus $E$ and $C$, respectively.}
      \label{fig:}
 \end{figure}
 
@@ -178,6 +215,26 @@ It consists of an encoder, partitioner, and decoder.
 \section{Results}
 
 \subsection{Multihead DeePWAK learns sparse representations}
+
+\begin{figure}
+  %\begin{subfigure}[b]{0.5\textwidth}
+  \includegraphics[width=\textwidth]{embeddings.pdf}
+    \caption{DeePWAK learns sparse embedding values. }
+    \label{fig:}
+\end{figure}
+
+    
+\begin{figure}
+  \includegraphics[width=\textwidth]{logits.pdf}
+  \caption{For most heads, two clusters dominate.}
+  \label{fig:}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{phenotype.pdf}
+  \caption{Hypergeometric test for enrichment of phenotype and treatment condition for each cluster in each head. Dot color indicates overrepresentation of each category in a cluster compared to a uniform prior. Dot size indicates statistical significance of the difference. Dot outline shade indicates number of embryos represented by a dot. Head 1 appears ``polysemantic''. The others appear to distinguish single phenotypic categories.}
+  \label{fig:}
+\end{figure}
 
 \section{Discussion}
 

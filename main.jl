@@ -1,5 +1,5 @@
 using Pkg
-#Pkg.activate("julia/leiden")
+Pkg.activate("julia/leiden")
 #include("julia/DeePWAK.jl")
 include("julia/fns.jl")
 

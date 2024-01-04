@@ -199,6 +199,7 @@ clustparam <- function(dat, clusts, out){
 	}
 }
 
+
 clusthyper <- function(dat, clusts, out){
 	require(moreComplexHeatmap)
 	# run hypergeometric tests for enrichment of conditions and phenotypes
