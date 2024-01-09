@@ -96,7 +96,7 @@ L_consensus = @showprogress map(1:100) do _
     end
 end
 
-p_s = Flux.state(p_consensus) |> cpu
+p_s = Flux.state(p_consensus) |> cpu;
 jldsave("p_consensus.jld2"; p_s)
 
 C_consensus = (p_consensus ∘ p_cat)(X)
@@ -123,8 +123,8 @@ L_Ec = @showprogress map(1:100) do _
     end
 end
 
-e_s = Flux.state(e_consensus) |> cpu
-jldsave("p_consensus.jld2"; e_s)
+e_s = Flux.state(e_consensus) |> cpu;
+jldsave("e_consensus.jld2"; e_s)
 
 E_consensus = (e_consensus ∘ e_cat)(X)
 Tables.table(E_consensus') |> CSV.write("data/E_consensus.csv")

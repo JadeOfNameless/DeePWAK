@@ -81,6 +81,15 @@ Heatmap(embeddings,
         column_title_rot=90)
 dev.off()
 
+pdf("data/embedding_consensus.pdf")
+Heatmap(E_c,
+        name="embedding",
+        show_column_names=F,
+        row_split=groups$Phenotype,
+        row_title_rot=0,
+        column_title_rot=90)
+dev.off()
+
 softclust <- do.call(cbind,C)
 logits <- log(softclust/(1-softclust))
 csplit <- do.call(c,lapply(names(clusts),rep,14))
@@ -94,6 +103,16 @@ Heatmap(logits,
         row_title_rot=0,
         column_title_rot=90)
 dev.off()
+
+pdf("data/logits_consensus.pdf")
+Heatmap(logits_c,
+        name="logit",
+        show_column_names=F,
+        row_split=groups$Phenotype,
+        row_title_rot=0,
+        column_title_rot=90)
+dev.off()
+
 
 sapply(names(C), function(i){
     pdf(paste0('data/clust/',i,'.pdf'))
@@ -255,7 +274,6 @@ dotPscale(as.matrix(cond_c$log2OR),
         as.matrix(cond_c$q), 
         file='cond_c', 
         path='data', 
-        row_split=rowsplit_c, 
     row_title_rot=0,
     column_title_rot=90)
 

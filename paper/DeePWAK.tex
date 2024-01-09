@@ -42,7 +42,7 @@
 
 \date{\today}
 
-\title{DeePWAK: Sparse Ensemble Clustering using Denoising}
+\title{DeePWAK: End-to-end Differentiable Sparse Ensemble Clustering using Denoising}
 
 \author{Keira Wiechecki \\
   Center for Genomics \& Systems Biology \\
@@ -71,6 +71,50 @@ But rather than creating a single consensus partition, we aim to maximise indepe
 Our approach uses what we believe to be a previously unexplored combination of an information bottleneck with self-supervised denoising.
 Like ClAM\cite{saha2023endtoend} it is end-to-end differentiable.
 Unlike ClAM,
+
+\subsection{Notation}
+Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality.
+A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters.
+Capital Greek letters indicate parameter spaces.
+For parameters $\theta$, $\theta^{m \to d}$ indicates parameters for a model that accepts an input of dimension $m$ and returns an output of dimension $d$.
+$\function^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\function$.
+
+It's necessary to distinguish between a model architecture and its parameters.
+We use the notation $\mathcal{F}(\theta)$ to indicate a model architecture $\mathcal{F}$ parameterized by $\theta$.
+$\mathcal{F}(\theta)(X)$ indicates passing data $X$ to the model $\mathcal{F}(\theta)$.
+We write this as a curried function to emphasize that $\mathcal{F}(\theta)$ is stateful.
+
+\subsection{Type Definitions}
+We define a $\mathtt{Model}$ as having type
+
+\begin{equation}
+  \mathtt{Model} := \exists m,d : \mathbb{N} \to \mathbb{R}^m \to \mathbb{R}^d
+\end{equation}
+
+\begin{equation}
+  \mathtt{Architecture} := \forall m,d : \mathbb{N} \to \mathbb{R}^{m \to d} \to \mathtt{Model}(m,d)
+\end{equation}
+
+
+In other words, a $\mathtt{Model}$ has an input dimension $m$ and an output dimension $d$. For any input $X \in \mathbb{R}^m$,
+it applies a sequence of operations parameterized by $\theta \in \mathbb{R}^{m \to d}$ which transform $X$ to an output $E \in \mathbb{R}^d$.
+
+We define a $\mathtt{Loss}$ function as having type
+
+\begin{equation}
+  \mathtt{Loss} := \forall m,d : \mathbb{N} \to \mathtt{Model}(m,d) \to \mathbb{R}^m \to \mathbb{R}^d \to \mathbb{R}
+\end{equation}
+
+For any model $\mathcal{F} : \mathtt{Model}$ parameterized by $\theta^{m \to d}$, it accepts inputs $X \in \mathbb{R}^m$ and $E \in \mathbb{R}^d$.
+It returns a scalar representing the similarity between $\mathcal{F}(\theta)(X)$ and $E$.
+
+Additionally, a $\mathtt{Model}$ must implement an $\mathrm{update!}$ function, which has type
+
+
+\begin{equation}
+  \forall  \mathcal{F} : \mathtt{Model}, \mathcal{L} : \mathtt{Loss}. 
+\end{equation}
+
 
 \subsection{noise2self}
 
@@ -111,9 +155,6 @@ Let $C^{c \times n}$ be a matrix representing a clustering of $n$ points into $c
 
 Informally, this can be equated to position-independent attention with data points as tokens and the batch size as the context window.
 
-\section{Notation}
-Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality. A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters. Capital Greek letters indicate parameter spaces. For parameters $\theta$, $\theta^{m \to d}$ indicates parameters for a model that accepts an input of dimension $m$ and returns an output of dimension $d$. $\function^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\function$.
-
 \section{Architecture}
 
 The DeePWAK constructor has the type signature
@@ -140,18 +181,22 @@ The architecture is inspired by dot product attention, but has a few key differe
 \begin{algorithm}
   \caption{DeePWAK application}\label{alg:cap}
   \begin{algorithmic}[1]
-    \State \textbf{function} $\mathrm{DeePWAK}(\theta, \pi, \phi)(X : \mathbb{R}^{m \times n})${
-    \State $E \gets \theta(X)$
-    \State $C \gets (\mathrm{softmax} \circ \pi)(X)$
+    \State \textbf{function} $\mathrm{DeePWAK}(\mathcal{E}(\theta), \mathcal{P}(\pi), \mathcal{D}(\phi))(X : \mathbb{R}^{m \times n})${
+    \State $E \gets \mathcal{E}(\theta)(X)$
+    \State $C \gets (\mathrm{softmax} \circ \mathcal{P}(\pi))(X)$
     \State $P \gets C^\top C$
     \State $G \gets \mathrm{WAK}(P)$
     \State $\hat{E} \gets (GE^\top)^\top$
-    \State $\hat{X} \gets \phi(\hat{E})$
+    \State $\hat{X} \gets \mathcal{D}(\phi)(\hat{E})$
     \State \textbf{return} $\hat{X}$
     }
   \end{algorithmic}
 \end{algorithm}
 
+\begin{algorithm}
+  \caption{DeePWAKBlock}
+\end{algorithm}
+  
 \subsection{Multihead DeePWAK}
 
 \section{A concrete example from microscopy data}
@@ -191,7 +236,16 @@ DEWAKSS is poorly suited to
      \end{subfigure}
      
 
-     \vspace{1cm}
+     \caption{(a) Architectures of encoder, partitioner, and decoder.
+       (b) Architecture of one DeePWAK head.
+       (c) Architecture of one DeePWAK block.
+       (d) Architectures of pooled encoder and pooled clusterer.
+       }
+     \label{fig:}
+\end{figure}
+
+\begin{figure}
+
      \begin{subfigure}[b]{0.5\textwidth}
         \input{tikz/consensusencoder.tex}
          \caption{}
@@ -203,14 +257,24 @@ DEWAKSS is poorly suited to
        \caption{}
        \label{fig:}
      \end{subfigure}
-     \caption{(a) Architectures of encoder, partitioner, and decoder.
-       (b) Architecture of one DeePWAK head.
-       (c) Architecture of one DeePWAK block.
-       (d) Architectures of pooled encoder and pooled clusterer.
-       (e,f) Calculation of consensus $E$ and $C$, respectively.}
+
+  \vspace{1cm}
+     
+     \begin{subfigure}[b]{0.5\textwidth}
+       \input{tikz/DeePWAK_Ec.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/DeePWAK_Cc.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+
+     \caption{(a,b) Calculation of consensus $E$ and $C$, respectively.}
      \label{fig:}
 \end{figure}
-
 
 \section{Results}
 
