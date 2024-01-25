@@ -1,0 +1,162 @@
+\section{Introduction}
+  %Clustering is a special case of sparse dictionary learning where all features are discrete.
+Fundamentally, unsupervised learning is a problem of finding the latent space of a data set.
+Denoising, compression, and clustering all ultimately attempt to solve this problem, but approach it from different directions.
+Denoising aims to remove spurious dimensions whereas compression looks to select informative dimensions.
+The connection to clustering is less obvious, but no less foundational\cite{9830658}.
+
+
+At its heart, clustering is an optimization problem of how to partition a data set given some loss function.
+
+There are a few ways to conceptualize this isomorphism.
+
+\paragraph{Clustering as principal components in latent space}
+Data are sparse in latent space.
+We could think of a cluster as a vector along which data are relatively dense.
+Though it might na\"ively be expected that enforcing orthogonality would be a problem,  
+it's important to keep in mind that latent space is \textit{really high dimensional}.
+In practice most vectors can be treated as ``almost orthogonal''.
+
+\paragraph{Clustering as (lossy) compression}
+A cluster can be thought of as an injection of a subset of the data onto some representative value/vector.
+This is essentially a decomposition of the data into a 1-hot incidence matrix of cluster assignments and a matrix of central cases.
+As an illustration, consider data $X \in \mathbb{R}^{m \times n}$ where $n$ is the number of data points and $m$ is the dimensionality.
+We cluster $X$ into $k$ clusters.
+We obtain a matrix of central cases for each cluster $C \in \mathbb{R}^{k \times m}$.
+The incidence matrix is given by $K \in \mathbb{B}^{n \times k}$.
+We now have a lossy approximation of $X$ with the matrix decomposition
+
+\begin{equation}
+  X \approx KC
+\end{equation}
+
+\paragraph{Clustering as denoising}
+Compression loss isn't always a problem.
+Identifying informative latent features means throwing out uninformative latent features.
+
+\paragraph{Clustering as sparse dictionary learning}
+Optimizing (1) is essentally the goal of sparse dictionary learning, where
+$C$ is the dictionary and $K$ is the key.
+
+\paragraph{Clustering as the optimal way of labeling a data set}
+
+I propose 
+
+\paragraph{Clusters as attractor states}
+One of the most beautiful results from information theory is that \textit{prediction is thermodynamic work}.
+Consider 
+
+
+
+
+Though applications of deep learning to classification is well established, self-supervised classification has been much less thoroghly explored.
+Deep clustering is an active area of research\cite{ren2022deep}.
+Similarly to DeepCluE\cite{huang2023deepclue}, we use an ensemble clustering method.
+But rather than creating a single consensus partition, we aim to maximise independence between submodels.
+%A common pretraining method is contrastive clustering\cite{li2020contrastive}.
+%This is a method of self-supervised feature detection consisting of generating synthetic pairs of data by applying various image transformations.
+
+%Our approach uses what we believe to be a previously unexplored combination of an information bottleneck with self-supervised denoising.
+Like ClAM\cite{saha2023endtoend} it is end-to-end differentiable.
+Unlike ClAM,
+
+\subsection{Notation}
+Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality.
+A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters.
+Capital Greek letters indicate lists of parameters for multiple models.
+Boldface Greek letters indicate parameter spaces.
+%For parameters $\theta$, $\theta^{m \to d}$ indicates parameters for a model that accepts an input of dimension $m$ and returns an output of dimension $d$.
+
+$\fn^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\fn$.
+
+$\odot$ is the Hadamard product.
+
+$\map^n_{i=k}\expr$ indicates mapping $\expr$ over $i \in \{k:n\}$.
+
+$\map^{X,Y}_{x,y}\expr$ indicates mapping $\expr$ over $(x \in X,y \in Y)$.
+
+$\List(\Type,n)$ indicates a list of $n$ elements of \Type.
+
+We will sometimes find it necessary to distinguish between a model, a model's architecture, and a model's parameters.
+$f:\Model(n,m)$ indicates a model $f:\mathbb{R}^n \to \mathbb{R}^m$.
+
+$\mathcal{F}:\Arch(n,m)$ indicates an architecture for a model $\Model(n,m)$.
+
+$\theta:\Params(\mathcal{F})$ indicates the parameters for $\mathcal{F}$.
+
+We use the notation $\mathcal{F}(\theta)$ to indicate a model architecture $\mathcal{F}$ parameterized by $\theta$.
+$\mathcal{F}(\theta)(X)$ indicates passing data $X$ to the model $\mathcal{F}(\theta)$.
+We write this as a curried function to emphasize that $\mathcal{F}(\theta)$ is stateful.
+
+
+\subsection{$\ntos$}
+
+Batson \& Royer\cite{batson2019noise2self} identify a class of denoising functions which can be optimised using only unlabeled noisy data.
+Moreover, this denoising 
+
+Let $J \in \mathcal{J}$ be independent partitions of noisy data $X$. Let $\mathcal{F}(\theta)$ be a family of predictors of $X_J$ with tunable parameters $\theta \in \mathbf{\Theta}$ that depends on its complement $X_{J^C}$
+
+\begin{equation}
+  \hat{X}_J=\mathcal{F}(\theta)(X_{J^C})
+\end{equation}
+
+In other words, $\mathcal{F}$ predicts each data point $X_J$ from some subset of the data excluding $X_J$. 
+
+  The optimal $\theta$ is given by
+
+\begin{equation}
+  \ntos_\theta^{\mathbf{\Theta}}[\mathcal{F}(\theta),X] := \argmin_\theta^{\mathbf{\Theta}}[\sum_{J}^{\mathcal{J}}\mathbb{E}[X_J-\mathcal{F}(\theta)(X_{J^C})]^2]
+\end{equation}
+
+
+
+\subsection{Diffusion with weighted affinity kernels}
+
+Our choice of $\mathcal{F}$ is adapted from DEWAKSS\cite{tjarnberg2021}. The parameters we want to tune generate a graph $G$ from embeddings $E$. The adjacency matrix of any graph can be treated as a transition matrix (or weighted affinity kernel) by setting the diagonal to 0 and normalizing columns to sum to 1. We call this the \WAK function.
+
+\input{algorithms/wak.tex}
+
+For each embedding, an estimate is calculated based on its neighbors in the graph. This can be expressed as matrix multiplication.
+
+\begin{equation}
+\hat{E} := \WAK(G)E^\top
+\end{equation}
+
+\input{algorithms/dewakss.tex}
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{10NN100.pdf}
+  \caption{Illustration of diffusion with DEWAKSS. In this case the kernel is a 10-NN computed using the first 10 PCs of the data. Note that the denoised result is substantially smoother than the input data. While smoothing is often desirable for data imputation, for our purposes we would prefer to perserve variation.}
+  \label{fig:}
+\end{figure}
+
+\subsection{Partitioned weighted affinity kernels} 
+
+Though DEWAKSS uses a $k$-NN graph, any adjacency matrix will do.
+A clustering can be expressed as a graph where points within a cluster are completely connected and clusters are disconnected.
+
+Let $K^{k \times n}$ be a matrix representing a clustering of $n$ points into $k$ clusters. Let each column be a 1-hot encoding of a cluster assignment for each point. We can obtain a partition matrix $P^{n \times n}$ by
+
+\begin{equation}
+  P := \WAK(K^\top K)
+\end{equation}
+
+This method can be extended to soft cluster assignment, making it possible to learn $K$ via SGD.
+
+\input{types/partitioner.tex}
+
+\input{algorithms/partitioner.tex}
+
+\input{train/partitioner.tex}
+We can now train a classifier with unlabeled data, no prior distribution, and no predefined number of clusters in $\mathcal{O}(n^2)$ time!
+The only hyperparameters are the maximum number of clusters, the neural net architecture, and the training hyperparameters.
+Because $PE^\top$ is $\mathcal{J}$-invariant, this classifier will converge on a solution less than the maximum $k$.
+We will refer to a model of this sort as a \Partitioner to emphasize that while it returns logits corresponding to classifications, there are no labels on the training data.
+
+Intuitions from transformers may be helpful in visualizing why this works.
+Informally, $P$ can be equated to position-independent attention with data points as tokens and the batch size as the context window.
+Attentive readers may make a connection between masking the diagonal and BERT.
+
+\subsection{Diffusion in embedding space}
+
+Optimizing $K$ using diffusion assumes 

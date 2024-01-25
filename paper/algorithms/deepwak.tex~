@@ -1,0 +1,7 @@
+\begin{algorithmic}[1]
+  \KwIn{$\forall n : \mathbb{N}$ \tcp*{batch size}}
+  \KwIn{$\forall m : \mathbb{N}$ \tcp*{input parameter dimension}}
+  \KwIn{$\forall d : \mathbb{N}$ \tcp*{embedding dimension}}
+  \KwIn{$\forall k : \mathbb{N}$ \tcp*{maximum number of clusters}}
+  \KwIn{$\theta: \mathbb{R}^m \to 
+  

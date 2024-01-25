@@ -1,0 +1,18 @@
+\begin{algorithm}[H]
+  \caption{DeePWAKBlock constructor}
+  \DontPrintSemicolon  % Don't print semicolons
+
+  \Dat{\DeePWAKBlock{$\mathcal{W},h$}}{
+
+    {$\forall \mathcal{E}$ : $\Arch(m,d)$ \tcp*{encoder template}}
+    {$\forall \mathcal{K}$ : $\Arch(m,k)$ \tcp*{partitioner template}}
+    {$\forall \mathcal{D}$ : $\Arch(d,m)$ \tcp*{decoder template}}
+    \KwIn{}
+    $\mathcal{W}$ : \DeePWAK{$\mathcal{E},\mathcal{K},\mathcal{D}$} \tcp*{DeePWAK architecture}
+    $h$ : $\mathbb{N}$ \tcp*{number of heads}
+    
+    \KwOut{}
+    $\List(\Params(\mathcal{E}),h) \to \List(\Params(\mathcal{K}),h) \to \List(\Params(\mathcal{D}),h) \to \Params(\Linear(hm,m)) \to \Model(m,m)$
+    }
+\end{algorithm}
+

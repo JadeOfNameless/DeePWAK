@@ -1,0 +1,110 @@
+\section{Methods}
+
+\subsection{DeePWAK}
+
+Our basic unit performing clustering is the DeePWAK head.
+It is a deep learning architecture consisting of an encoder, classifier, and decoder subnetworks.
+We refer to the classifier subnetwork as a ``partitioner'' to emphasize that the data are unlabeled.
+There is no accuracy measure separate from the decoder loss.
+The partitioner simply tries to find the best $P$ for minimizing loss of the decoded output.
+It can be considered a form of deep embedding clustering\cite{xie2016unsupervised}.
+However there are several key differences from the canonical DEC implementation.
+Because we use a loss function based on $\ntos$, we don't need to carefully choose a kernel
+
+The DeePWAK algorithm is inspired by dot product attention, but has a few key differences. Because it is position-independent, $Q$ and $K$ are simply transposes of each other. Instead of a shared MLP layer, each head has a separate encoder and decoder. This makes it easier to reason about components in isolation.
+
+
+\input{types/deepwak.tex}
+
+\input{algorithms/deepwak.tex}
+
+  
+\begin{figure}
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/layers.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/DeePWAK.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+
+     \caption{
+       (a) Example architectures of encoder, partitioner, and decoder submodels. These are the architectures used in Section 3, but the algorithm generalizes to any $f,g,h:\mathbb{R}^* \to \mathbb{R}^*$ with appropriate input and output dimensions. In this case $m=114$, $d=14$,and $k=14$.
+       (b) Architecture of one DeePWAK head.
+     }
+     \label{fig:}
+\end{figure}
+  
+\subsection{Ensemble DeePWAK}
+
+\input{types/block.tex}
+
+\input{algorithms/block.tex}
+
+\begin{figure}
+  
+        \input{tikz/DeePWAKBlock.tex}
+         \caption{Architecture of one DeePWAK block with $h=5$.}
+         \label{fig:}
+\end{figure}
+
+After training the \DeePWAKBlock, we can attempt to learn pooling models that compute consensus clusters and embeddings.
+
+\begin{figure}
+  \input{tikz/consensuslayers.tex}
+  \caption{
+    Example architectures of pooled encoder and pooled clusterer.
+  }
+  \label{fig:}
+\end{figure}
+
+\begin{figure}
+
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/consensusencoder.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{\textwidth}
+       \input{tikz/consensus.tex}
+       \caption{}
+       \label{fig:}
+     \end{subfigure}
+
+  \vspace{1cm}
+     
+     \begin{subfigure}[b]{0.5\textwidth}
+       \input{tikz/DeePWAK_Ec.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/DeePWAK_Cc.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+
+     \caption{(a,b) Calculation of consensus $E$ and $C$, respectively.
+     (c,d) Drop-in of consensus $E$ and $C$.}
+     \label{fig:}
+\end{figure}
+
+\subsection{Example Data}
+We tested DeePWAK on preprocessed data from 3D microscopy.
+This data set was obtained from 1853 \textit{Ciona robusta} embryos.
+
+PCA-based methods perform poorly on this data set.
+
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{params.pdf}
+    \caption{Microscopy data after preprocessing. }
+    \label{fig:}
+\end{figure}
+

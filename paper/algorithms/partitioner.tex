@@ -1,0 +1,20 @@
+\begin{algorithm}[H]
+  \caption{Partitioner application}
+  \DontPrintSemicolon  % Don't print semicolons
+  
+  \Fn{$(\Partitioner(\mathcal{K}))(\pi,X)$}{
+  {$\forall \mathcal{K}$ : \Arch{$m,k$} \tcp*{partitioner architecture}}
+
+  \KwIn{}
+      {$\pi$ : \Params{$\mathcal{K}$} \tcp*{partitioner parameters}}
+      {$X$ : $\mathbb{R}^{m}$ \tcp*{input data}}
+      \KwOut{}
+            {$K$ : $\mathbb{R}^{k}$ \tcp*{cluster logits}}
+
+  \Begin{
+    $K_0 \leftarrow \mathcal{K}(\pi)(X)$ \tcp*{cluster logit matrix}
+    $K \leftarrow \softmax(K_0)$ \tcp*{}
+    \KwRet{$K$}
+    }
+  }
+\end{algorithm}

@@ -1,0 +1,11 @@
+\begin{algorithm}[H]
+  \caption{Weighted Affinity Kernel}
+  \DontPrintSemicolon  % Don't print semicolons
+
+  \SetKwProg{Fn}{Function}{}{end}
+  \SetKwFunction{WAK}{WAK}
+
+  \Fn{\WAK{$G$}}{
+    \KwIn{$G$ : $\mathbb{R}^{n \times n}$}
+    \KwOut{$W$ : $\mathbb{R}^{n \times n}$}
+    \K

@@ -1,0 +1,23 @@
+\begin{algorithm}[H]
+  \caption{Partitioner application}
+  \DontPrintSemicolon  % Don't print semicolons
+  
+  \Fn{$(\Partitioner(\mathcal{P}))(\pi,X)$}{
+  {$\forall \mathcal{P}$ : \Arch{$m,k$} \tcp*{partitioner architecture}}
+
+  \KwIn{$\pi$ : \Params{$\mathcal{P}$} \tcp*{partitioner parameters}}
+
+  {$X$ : $\mathbb{R}^{m}$ \tcp*{input data}}
+
+  \KwOut{$K$ : $\mathbb{R}^{k}$ \tcp*{cluster logits}}
+
+  \Begin{
+    $E \leftarrow \map^{n}_{i=1}\mathcal{E}(\theta)(X[:,i])$ \tcp*{embedding matrix}
+    $K \leftarrow \map^{n}_{i=1}(\softmax \circ \mathcal{P}(\pi))(X[:,i]))$ \tcp*{cluster logit matrix}
+    $P \leftarrow$ \WAK{$K^{\top}K$} \tcp*{partition matrix}
+    $\hat{E} \leftarrow (PE^\top)^\top$ \tcp*{denoised embedding}
+    $\hat{X} \leftarrow \map^{n}_{i=1}\mathcal{D}(\phi)(\hat{E}[:,i])$ \tcp*{denoised data}
+    \KwRet{$\hat{X}$}
+  }
+  }
+\end{algorithm}

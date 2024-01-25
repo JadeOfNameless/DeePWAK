@@ -1,0 +1,34 @@
+\begin{algorithm}[H]
+  \caption{Hyperparameter optimization with DEWAKSS.}
+  \DontPrintSemicolon  % Don't print semicolons
+  
+  \Fn{DEWAKSS{X}{
+  {$\forall n$ : $\mathbb{N}$ \tcp*{batch size}}
+  {$\forall m$ : $\mathbb{N}$ \tcp*{batch size}}
+  \Hyper{}
+  {$k_{max}$ : $\mathbb{N}$ \tcp*{maximum number of neighbors}}
+  {$d_{max}$ : $\mathbb{N}$ \tcp*{maximum number of PCs}}
+
+  \KwIn{$X$ : $\mathbb{R}^{m \times n}}
+  {$\theta$ : \Params{$\mathcal{E}$} \tcp*{encoder}}
+  {$\pi$ : \Params{$\mathcal{P}$} \tcp*{partitioner}}
+  {$\phi$ : \Params{$\mathcal{D}$} \tcp*{decoder}}
+
+  {$X$ : $\mathbb{R}^{m \times n}$ \tcp*{input data}}
+
+  \KwOut{}
+        {$\hat{X}$ : $\mathbb{R}^{m \times n}$ \tcp*{denoised data}}
+
+  \Begin{
+    $E \leftarrow \map^{n}_{i=1}\mathcal{E}(\theta)(X[:,i])$ \tcp*{embedding matrix}
+    $K \leftarrow \map^{n}_{i=1}(\softmax \circ \mathcal{P}(\pi))(X[:,i]))$ \tcp*{cluster logit matrix}
+    $P \leftarrow$ \WAK{$K^{\top}K$} \tcp*{partition matrix}
+    $\hat{E} \leftarrow (PE^\top)^\top$ \tcp*{denoised embedding}
+    $\hat{X} \leftarrow \map^{n}_{i=1}\mathcal{D}(\phi)(\hat{E}[:,i])$ \tcp*{denoised data}
+    \KwRet{$\hat{X}$}
+  }
+  }
+\end{algorithm}
+
+    
+  

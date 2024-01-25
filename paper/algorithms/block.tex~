@@ -1,0 +1,15 @@
+\begin{algorithmic}[1]
+  \KwIn{$\forall n : \mathbb{N}$ \tcp*{batch size}}
+  \KwIn{$\forall m : \mathbb{N}$ \tcp*{input parameter dimension}}
+  \KwIn{$\forall d : \mathbb{N}$ \tcp*{embedding dimension}}
+  \KwIn{$\forall k : \mathbb{N}$ \tcp*{maximum number of clusters}}
+  \KwIn{$\forall h : \mathbb{N}$ \tcp*{number of heads}}
+
+  \KwIn{$\Theta : \mathtt{List}(\mathbb{R}^m \to \mathbb{d},h)$ \tcp*{encoder}}
+  \KwIn{$\Pi : \mathtt{List}(\mathbb{R}^m \to \mathbb{R}^k,h)$ \tcp*{partitioner}}
+  \KwIn{$\Phi : \mathtt{List}(\mathbb{R}^d \to \mathbb{R}^m,h)$ \tcp*{decoder}}
+  \KwIn{$\psi : \mathbb{R}^{m \times h} \to \mathbb{R}^m$ \tcp*{pooling layer}
+
+  \KwIn{$X : \mathbb{R}^{m \times n}$ \tcp*{input data}}
+
+  \KwOut{$\hat{X} : \mathbb{R}^{m \times n}$ \tcp*{denoised data}}

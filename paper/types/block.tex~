@@ -1,0 +1,17 @@
+\begin{algorithm}[H]
+  \caption{DeePWAKBlock constructor}
+  \DontPrintSemicolon  % Don't print semicolons
+
+  \Dat{\DeePWAKBlock}{$\mathcal{W},h$}{
+
+    {$\forall \mathcal{E}$ : $\Arch(m,d)$ \tcp*{input parameter dimension}}
+    {$\forall \mathcal{P}$ : $\Arch(m,k)$ \tcp*{embedding dimension}}
+    {$\forall \mathcal{D}$ : $\Arch(d,m)$ \tcp*{maximum number of clusters}}
+    \KwIn{}
+    $\mathcal{W}$ : $\DeePWAK{\mathcal{E},\mathcal{P},\mathcal{D}}$ \tcp*{DeePWAK architecture}
+    $h$ : $\mathbb{N}$ \tcp*{number of heads}
+    
+    \KwOut{}
+    $\List{\Params{\mathcal{E}},h} \to \List{\Params{\mathcal{P}},h} \to \List{\Params{\mathcal{D}}} \to \Params{\Linear{hm,m}} \to \Model{m,m}$
+\end{algorithm}
+

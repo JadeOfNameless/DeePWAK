@@ -111,3 +111,17 @@ function zfc(X::AbstractMatrix;dims=2)
     X̃ = W * X;
     return X̃
 end
+
+function rep(expr,n)
+    return map(_->expr,1:n)
+end
+
+function pca(X::AbstractMatrix)
+    μ = mean(X,dims=1)
+    X_0 = X .- μ
+    Σ = cov(X_0);
+    Λ,U = eigen(Σ);
+    return (X_0 * U)'
+end
+
+    

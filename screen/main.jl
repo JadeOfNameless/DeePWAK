@@ -128,3 +128,12 @@ jldsave("e_consensus.jld2"; e_s)
 
 E_consensus = (e_consensus ∘ e_cat)(X)
 Tables.table(E_consensus') |> CSV.write("data/E_consensus.csv")
+
+include("julia/knn.jl")
+
+G_10 = knn(E_consensus,10)
+
+Tables.table(G_10) |> CSV.write("data/10NN.csv")
+
+Ehat_10 = wak(G_10) * E_consensus
+Tables.table(Ehat_10) |> CSV.write("data/Ehat_10.csv")

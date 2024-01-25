@@ -18,8 +18,7 @@
 \usepackage{lipsum}
 \usepackage{graphicx}
 
-\usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage{algorithm2e}
 
 \usepackage[backend=biber]{biblatex}
 \addbibresource{refs.bib}
@@ -29,278 +28,87 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, bending, positioning}
 
-\newcommand{\txtop}[1]{\mathop{\mathrm{#1}}\limits}
+\newcommand{\map}{\mathop{\bigoplus}\limits}
+\newcommand{\txtop}[1]{\mathop{\mathtt{#1}}\limits}
+
+\newcommand{\expr}{\txtop{expression}}
+
+\newcommand{\fn}{\txtop{function}}
 \newcommand{\tanhl}{\txtop{tanh}}
-\newcommand{\softmax}{\txtop{softmax}}
 \newcommand{\linear}{\txtop{linear}}
 \newcommand{\sigmoid}{\txtop{sigmoid}}
+\newcommand{\argmin}{\txtop{argmin}}
+\newcommand{\ntos}{\txtop{noise2self}}
+
 \newcommand{\DeePWAK}{\txtop{DeePWAK}}
 \newcommand{\encoder}{\txtop{encoder}}
 \newcommand{\decoder}{\txtop{decoder}}
 \newcommand{\partitioner}{\txtop{partitioner}}
-\newcommand{\function}{\txtop{function}}
+
+
+\SetKwProg{Fn}{Function}{}{end}
+\SetKwProg{Dat}{Data}{}{end}
+
+\SetKwInOut{Hyper}{Hyperparameters}
+
+\SetKwFunction{softmax}{softmax}
+\SetKwFunction{MSE}{MSE}
+\SetKwFunction{transpose}{transpose}
+\SetKwFunction{matmul}{matmul}
+\SetKwFunction{eucl}{euclidean}
+\SetKwFunction{pca}{pca}
+\SetKwFunction{knn}{knn}
+
+\SetKwFunction{sample}{sample}
+\SetKwFunction{loss}{loss}
+\SetKwFunction{train}{train}
+\SetKwFunction{WAK}{WAK}
+\SetKwFunction{DEWAKSS}{DEWAKSS}
+\SetKwFunction{DeePWAKBlock}{DeePWAKBlock}
+\SetKwFunction{DeePWAK}{DeePWAK}
+
+\SetKwFunction{Type}{Type}
+\SetKwFunction{List}{List}
+\SetKwFunction{Arch}{Arch}
+\SetKwFunction{Params}{Params}
+\SetKwFunction{Model}{Model}
+\SetKwFunction{Linear}{Linear}
+\SetKwFunction{Partitioner}{Partitioner}
 
 \date{\today}
 
-\title{DeePWAK: End-to-end Differentiable Sparse Ensemble Clustering using Denoising}
+\title{Denoising with a Partitioned Affinity Kernel Allows Efficient End-to-End Differentiable Clustering}
 
-\author{Keira Wiechecki \\
-  Center for Genomics \& Systems Biology \\
-  New York University \\
-	%\And 
-        %Jade Zaslavsky
-	%Lionel Christiaen \\
+\author{
+  Keira Wiechecki \\
+  %Center for Genomics \& Systems Biology \\
+  %New York University \\
+  \And
+  Jade Zaslavsky
+  \And
+  Margaux Failla
+  \And
+  Lionel Christiaen \\
 }
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-  Clustering is a special case of sparse dictionary learning where all features are discrete.
 Here we introduce Denoising by Deep learning of a Partitoned Weighted Affinity Kernel (DeePWAK). 
 \end{abstract}
 
-\section{Introduction}
-Though applications of deep learning to classification is well established, self-supervised classification has been much less thoroghly explored.
-Deep clustering is an active area of research\cite{ren2022deep}.
-Similarly to DeepCluE\cite{huang2023deepclue}, we use an ensemble clustering method.
-But rather than creating a single consensus partition, we aim to maximise independence between submodels.
-%A common pretraining method is contrastive clustering\cite{li2020contrastive}.
-%This is a method of self-supervised feature detection consisting of generating synthetic pairs of data by applying various image transformations.
+\input{sections/introduction.tex}
 
-Our approach uses what we believe to be a previously unexplored combination of an information bottleneck with self-supervised denoising.
-Like ClAM\cite{saha2023endtoend} it is end-to-end differentiable.
-Unlike ClAM,
+\input{sections/methods.tex}
 
-\subsection{Notation}
-Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality.
-A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters.
-Capital Greek letters indicate parameter spaces.
-For parameters $\theta$, $\theta^{m \to d}$ indicates parameters for a model that accepts an input of dimension $m$ and returns an output of dimension $d$.
-$\function^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\function$.
+\input{sections/results.tex}
 
-It's necessary to distinguish between a model architecture and its parameters.
-We use the notation $\mathcal{F}(\theta)$ to indicate a model architecture $\mathcal{F}$ parameterized by $\theta$.
-$\mathcal{F}(\theta)(X)$ indicates passing data $X$ to the model $\mathcal{F}(\theta)$.
-We write this as a curried function to emphasize that $\mathcal{F}(\theta)$ is stateful.
-
-\subsection{Type Definitions}
-We define a $\mathtt{Model}$ as having type
-
-\begin{equation}
-  \mathtt{Model} := \exists m,d : \mathbb{N} \to \mathbb{R}^m \to \mathbb{R}^d
-\end{equation}
-
-\begin{equation}
-  \mathtt{Architecture} := \forall m,d : \mathbb{N} \to \mathbb{R}^{m \to d} \to \mathtt{Model}(m,d)
-\end{equation}
-
-
-In other words, a $\mathtt{Model}$ has an input dimension $m$ and an output dimension $d$. For any input $X \in \mathbb{R}^m$,
-it applies a sequence of operations parameterized by $\theta \in \mathbb{R}^{m \to d}$ which transform $X$ to an output $E \in \mathbb{R}^d$.
-
-We define a $\mathtt{Loss}$ function as having type
-
-\begin{equation}
-  \mathtt{Loss} := \forall m,d : \mathbb{N} \to \mathtt{Model}(m,d) \to \mathbb{R}^m \to \mathbb{R}^d \to \mathbb{R}
-\end{equation}
-
-For any model $\mathcal{F} : \mathtt{Model}$ parameterized by $\theta^{m \to d}$, it accepts inputs $X \in \mathbb{R}^m$ and $E \in \mathbb{R}^d$.
-It returns a scalar representing the similarity between $\mathcal{F}(\theta)(X)$ and $E$.
-
-Additionally, a $\mathtt{Model}$ must implement an $\mathrm{update!}$ function, which has type
-
-
-\begin{equation}
-  \forall  \mathcal{F} : \mathtt{Model}, \mathcal{L} : \mathtt{Loss}. 
-\end{equation}
-
-
-\subsection{noise2self}
-
-Batson \& Royer\cite{batson2019noise2self} identify a class of denoising functions which can be optimised using only unlabeled noisy data.
-
-Let $J \in \mathcal{J}$ be independent partitions of noisy data $X$. Let $\mathcal{F}(\theta)$ be a family of predictors of $X_J$ with tunable parameters $\theta \in \Theta$ that depends on its complement $X_{J^C}$
-
-\begin{equation}
-  \hat{X}_J=\mathcal{F}(\theta)(X_J^C)
-\end{equation}
-
-In other words, $\mathcal{F}$ predicts each data point $X_J$ from some subset of the data excluding $X_J$. 
-
-  The optimal $\theta$ is given by
-
-\begin{equation}
-  \underset{\theta}{\overset{\Theta}{\mathrm{noise2self}}}[\mathcal{F}(\theta),X] := \underset{\theta}{\overset{\Theta}{\mathrm{argmin}}}[\sum_{J}^{\mathcal{J}}\mathbb{E}||X_J-\mathcal{F}(\theta)(X_{J^C})||^2]
-\end{equation}
+\input{sections/discussion.tex}
 
 
 
-\subsection{Graph diffusion}
-
-Our choice of $\mathcal{F}$ is adapted from DEWAKSS\cite{tjarnberg2021}. The parameters we want to tune generate a graph $G$ from embeddings $E$. The adjacency matrix of any graph can be treated as a transition matrix (or weighted affinity kernel) by setting the diagonal to 0 and normalizing columns to sum to 1. We call this the $\mathrm{WAK}$ function. For each embedding, an estimate is calculated based on its neighbors in the graph. This can be expressed as matrix multiplication.
-
-\begin{equation}
-\hat{E} := \mathrm{WAK}(G)E^\top
-\end{equation}
-
-Though DEWAKSS uses a $k$-NN graph, any adjacency matrix will do.
-A clustering can be expressed as a graph where points within a cluster are completely connected and clusters are disconnected.
-
-Let $C^{c \times n}$ be a matrix representing a clustering of $n$ points into $c$ clusters. Let each column be a 1-hot encoding of a cluster assignment for each point. We can obtain a partition matrix $P^{n \times n}$ by
-
-\begin{equation}
-  P := C^\top C
-\end{equation}
-
-Informally, this can be equated to position-independent attention with data points as tokens and the batch size as the context window.
-
-\section{Architecture}
-
-The DeePWAK constructor has the type signature
-
-\begin{equation}
-  \mathrm{DeePWAK} := \forall m,d,c :\mathbb{N} \to (\mathbb{R}^m \to \mathbb{R}^d) \to (\mathbb{R}^m \to \mathbb{R}^c) \to (\mathbb{R}^d \to \mathbb{R}^m) \to \mathbb{R}^m \to \mathbb{R}^m
-\end{equation}
-
-It consists of an encoder, partitioner, and decoder.
-
-The architecture is inspired by dot product attention, but has a few key differences. Because it is position-independent, $Q$ and $K$ are simply transposes of each other. Each head has a separate encoder and decoder. 
-
-\begin{algorithm}
-  \caption{DeePWAK constructor}\label{alg:cap}
-  \begin{algorithmic}[1]
-    \State \textbf{data} $\mathrm{DeePWAK}${
-    \State $\mathrm{encoder} : \exists m,d : \mathbb{N} \to \mathbb{R}^m \to \mathbb{R}^d$
-    \State $\mathrm{partitioner} : \exists m,c : \mathbb{N} \to \mathbb{R}^m \to \mathbb{R}^c$
-    \State $\mathrm{decoder} : \exists d,m : \mathbb{N} \to \mathbb{R}^d \to \mathbb{R}^m$
-    }
-  \end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-  \caption{DeePWAK application}\label{alg:cap}
-  \begin{algorithmic}[1]
-    \State \textbf{function} $\mathrm{DeePWAK}(\mathcal{E}(\theta), \mathcal{P}(\pi), \mathcal{D}(\phi))(X : \mathbb{R}^{m \times n})${
-    \State $E \gets \mathcal{E}(\theta)(X)$
-    \State $C \gets (\mathrm{softmax} \circ \mathcal{P}(\pi))(X)$
-    \State $P \gets C^\top C$
-    \State $G \gets \mathrm{WAK}(P)$
-    \State $\hat{E} \gets (GE^\top)^\top$
-    \State $\hat{X} \gets \mathcal{D}(\phi)(\hat{E})$
-    \State \textbf{return} $\hat{X}$
-    }
-  \end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-  \caption{DeePWAKBlock}
-\end{algorithm}
-  
-\subsection{Multihead DeePWAK}
-
-\section{A concrete example from microscopy data}
-Tools for imaging 
-DEWAKSS is poorly suited to 
-
-\begin{figure}
-  \includegraphics[width=\textwidth]{params.pdf}
-    \caption{Microscopy data after preprocessing. }
-    \label{fig:}
-\end{figure}
-  
-\begin{figure}
-     \begin{subfigure}[b]{0.5\textwidth}
-        \input{tikz/layers.tex}
-         \caption{}
-         \label{fig:}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.5\textwidth}
-        \input{tikz/DeePWAK.tex}
-         \caption{}
-         \label{fig:}
-     \end{subfigure}
-
-     \vspace{1cm}
-     \begin{subfigure}[b]{0.5\textwidth}
-        \input{tikz/DeePWAKBlock.tex}
-         \caption{}
-         \label{fig:}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{\textwidth}
-       \input{tikz/consensuslayers.tex}
-       \caption{}
-       \label{fig:}
-     \end{subfigure}
-     
-
-     \caption{(a) Architectures of encoder, partitioner, and decoder.
-       (b) Architecture of one DeePWAK head.
-       (c) Architecture of one DeePWAK block.
-       (d) Architectures of pooled encoder and pooled clusterer.
-       }
-     \label{fig:}
-\end{figure}
-
-\begin{figure}
-
-     \begin{subfigure}[b]{0.5\textwidth}
-        \input{tikz/consensusencoder.tex}
-         \caption{}
-         \label{fig:}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{\textwidth}
-       \input{tikz/consensus.tex}
-       \caption{}
-       \label{fig:}
-     \end{subfigure}
-
-  \vspace{1cm}
-     
-     \begin{subfigure}[b]{0.5\textwidth}
-       \input{tikz/DeePWAK_Ec.tex}
-         \caption{}
-         \label{fig:}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.5\textwidth}
-        \input{tikz/DeePWAK_Cc.tex}
-         \caption{}
-         \label{fig:}
-     \end{subfigure}
-
-     \caption{(a,b) Calculation of consensus $E$ and $C$, respectively.}
-     \label{fig:}
-\end{figure}
-
-\section{Results}
-
-\subsection{Multihead DeePWAK learns sparse representations}
-
-\begin{figure}
-  %\begin{subfigure}[b]{0.5\textwidth}
-  \includegraphics[width=\textwidth]{embeddings.pdf}
-    \caption{DeePWAK learns sparse embedding values. }
-    \label{fig:}
-\end{figure}
-
-    
-\begin{figure}
-  \includegraphics[width=\textwidth]{logits.pdf}
-  \caption{For most heads, two clusters dominate.}
-  \label{fig:}
-\end{figure}
-
-\begin{figure}
-  \includegraphics[width=\textwidth]{phenotype.pdf}
-  \caption{Hypergeometric test for enrichment of phenotype and treatment condition for each cluster in each head. Dot color indicates overrepresentation of each category in a cluster compared to a uniform prior. Dot size indicates statistical significance of the difference. Dot outline shade indicates number of embryos represented by a dot. Head 1 appears ``polysemantic''. The others appear to distinguish single phenotypic categories.}
-  \label{fig:}
-\end{figure}
-
-\section{Discussion}
+\section{Conclusion}
 
 \printbibliography
 

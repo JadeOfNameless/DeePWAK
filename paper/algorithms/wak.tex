@@ -1,0 +1,19 @@
+\begin{algorithm}[H]
+  \caption{Weighted Affinity Kernel}
+  \DontPrintSemicolon  % Don't print semicolons
+
+  \SetKwProg{Fn}{Function}{}{end}
+  \SetKwFunction{WAK}{WAK}
+
+  \Fn{\WAK{$G$}}{
+    \KwIn{$G$ : $\mathbb{R}^{n \times n}$}
+    \KwOut{$W$ : $\mathbb{R}^{n \times n}$}
+    \Begin{
+      $G_{-I} \leftarrow G \odot (\mathbf{1} - I)$ \tcp*{set diagonal to 0}
+      $\mathbf{w} \leftarrow \map^n_{j=1}\sum^n_{i=1}G_{-I}[i,j]$ \tcp*{sum over columns}
+      $W \leftarrow G_{-I} \odot \mathbf{w}^{-1}$ \tcp*{scale columns to sum to 1}
+      \KwRet{$W$}
+    }
+  }
+\end{algorithm}
+

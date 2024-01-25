@@ -1,0 +1,41 @@
+\begin{algorithm}[H]
+  \caption{Partitioner training}
+  \DontPrintSemicolon  % Don't print semicolons
+  
+  \Fn{$(\train(\mathcal{P}))(\pi,X)$}{
+  {$\forall \mathcal{K}$ : \Arch{$m,k$} \tcp*{partitioner architecture}}
+  {$\forall \mathcal{P}$ : \Partitioner{$\mathcal{K}$} \tcp*{partitioner}}
+  \Hyper{}
+  $t$ : $\mathbb{N}$ \tcp*{number of epochs}
+  $b$ : $\mathbb{N}$ \tcp*{batch size}
+  $\eta$ : $\mathbb{R}$ \tcp*{learning rate}
+
+  \KwIn{}
+       {$\pi$ : \Params{$\mathcal{K}$} \tcp*{partitioner parameters}}
+       {$X$ : $\mathbb{R}^{m}$ \tcp*{input data}}
+       \KwOut{}
+             {$\pi$ : \Params{$\mathcal{K}$}}
+
+        \Begin{
+          \For{$\_ \in \{1:t\}$}{
+            $X \leftarrow \sample(X[:,],b)$ \tcp*{randomly sample data}
+          \Fn{\loss{$\kappa$}}{
+            \KwIn{$\kappa$ : \Params{$\mathcal{K}$} \tcp*{parameters to update}}
+            \KwOut{$l$ : $\mathbb{R}$ \tcp*{mean squared error}}
+            \Begin{
+              $K \leftarrow \mathcal{K}(\kappa,X)$ \tcp*{}
+              $P \leftarrow \WAK(K^{\top}K)$  \tcp*{}
+              $\hat{X} \leftarrow PX^\top$ \tcp*{}
+              $l \leftarrow \MSE(\hat{X},X)$ \tcp*{}
+              \KwRet{$l$}
+            }
+          }
+            $\pi \leftarrow \pi - \eta\nabla\loss(\pi)$ \tcp*{gradient descent}
+          }
+          \KwRet{$\pi$}
+        }
+        
+        
+          
+  }
+\end{algorithm}

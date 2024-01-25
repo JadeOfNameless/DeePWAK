@@ -1,0 +1,103 @@
+\section{Methods}
+
+\subsection{DeePWAK}
+
+The DeePWAK algorithm is inspired by dot product attention, but has a few key differences. Because it is position-independent, $Q$ and $K$ are simply transposes of each other. Instead of a shared MLP layer, each head has a separate encoder and decoder. This makes it easier to reason about components in isolation.
+
+\input{types/deepwak.tex}
+
+\input{algorithms/deepwak.tex}
+
+  
+\begin{figure}
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/layers.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/DeePWAK.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+
+     \caption{
+       (a) Example architectures of encoder, partitioner, and decoder submodels. These are the architectures used in Section 3, but the algorithm generalizes to any $f,g,h:\mathbb{R}^* \to \mathbb{R}^*$ with appropriate input and output dimensions. In this case $m=114$, $d=14$,and $k=14$.
+       (b) Architecture of one DeePWAK head.
+     }
+     \label{fig:}
+\end{figure}
+  
+\subsection{Multihead DeePWAK}
+
+\input{types/block.tex}
+
+\input{algorithms/block.tex}
+
+\begin{figure}
+  
+        \input{tikz/DeePWAKBlock.tex}
+         \caption{Architecture of one DeePWAK block with $h=5$.}
+         \label{fig:}
+\end{figure}
+
+
+\subsection{Example Data}
+We tested DeePWAK on preprocessed data from 3D microscopy.
+This data set was obtained from 1853 \textit{Ciona robusta} embryos.
+
+PCA-based methods perform poorly on this data set.
+
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{params.pdf}
+    \caption{Microscopy data after preprocessing. }
+    \label{fig:}
+\end{figure}
+
+\begin{figure}
+     \begin{subfigure}[b]{\textwidth}
+       \input{tikz/consensuslayers.tex}
+       \caption{}
+       \label{fig:}
+     \end{subfigure}
+     
+
+     \caption{
+       (d) Architectures of pooled encoder and pooled clusterer.
+       }
+     \label{fig:}
+\end{figure}
+
+\begin{figure}
+
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/consensusencoder.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{\textwidth}
+       \input{tikz/consensus.tex}
+       \caption{}
+       \label{fig:}
+     \end{subfigure}
+
+  \vspace{1cm}
+     
+     \begin{subfigure}[b]{0.5\textwidth}
+       \input{tikz/DeePWAK_Ec.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/DeePWAK_Cc.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+
+     \caption{(a,b) Calculation of consensus $E$ and $C$, respectively.}
+     \label{fig:}
+\end{figure}

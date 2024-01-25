@@ -1,0 +1,30 @@
+\begin{algorithm}[H]
+  \caption{DeePWAKBlock application}
+  \DontPrintSemicolon  % Don't print semicolons
+
+  \SetKwProg{Fn}{Function}{}{end}
+  \SetKwFunction{List}{List}
+  \SetKwFunction{DeePWAKBlock}{DeePWAKBlock}
+  \SetKwFunction{DeePWAK}{DeePWAK}
+  \Fn{$(\DeePWAKBlock(\mathcal{W},h))(\Theta,\Pi,\Phi,\psi,X)$}{
+    $\forall \mathcal{W}$ : \DeePWAK{$\mathcal{E},\mathcal{K},\mathcal{D}$} \tcp*{DeePWAK template}
+  \KwIn{}
+
+  {$\Theta$ : \List{\Params{$\mathcal{E}$},$h$} \tcp*{encoders}}
+  {$\Pi$ : \List{\Params{$\mathcal{K}$},$h$} \tcp*{partitioners}}
+  {$\Phi$ : \List{\Params{$\mathcal{D}$},$h$} \tcp*{decoders}}
+  {$\psi$ : \Params{\Linear{$hm,m$}} \tcp*{pooling layer params}}
+
+  {$X$ : $\mathbb{R}^{m \times n}$ \tcp*{input data}}
+
+  \KwOut{}
+        {$\hat{X}$ : $\mathbb{R}^{m \times n}$ \tcp*{denoised data}}
+
+  \Begin{
+    $\mathcal{X} \leftarrow \map^{\Theta,\Pi,\Phi}_{\theta,\pi,\phi}\mathcal{W}(\theta,\pi,\phi,X)$ \tcp*{apply DeePWAK in parallel}
+  $f \leftarrow \Linear(hm,m)(\psi)$ \tcp*{pooling layer}
+    $\hat{X} \leftarrow f(\mathcal{X})$ \tcp*{consensus denoised output}
+    \KwRet{$\hat{X}$}
+  }
+  }
+\end{algorithm}
