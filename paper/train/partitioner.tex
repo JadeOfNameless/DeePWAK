@@ -6,8 +6,7 @@
   {$\forall \mathcal{K}$ : \Arch{$m,k$} \tcp*{partitioner architecture}}
   {$\forall \mathcal{P}$ : \Partitioner{$\mathcal{K}$} \tcp*{partitioner}}
   \Hyper{}
-  $t$ : $\mathbb{N}$ \tcp*{number of epochs}
-  $b$ : $\mathbb{N}$ \tcp*{batch size}
+  $t,b$ : $\mathbb{N}$ \tcp*{epochs, batch size}
   $\eta$ : $\mathbb{R}$ \tcp*{learning rate}
 
   \KwIn{}
@@ -24,8 +23,8 @@
             \KwOut{$l$ : $\mathbb{R}$ \tcp*{mean squared error}}
             \Begin{
               $K \leftarrow \mathcal{K}(\kappa,X)$ \tcp*{}
-              $P \leftarrow \WAK(K^{\top}K)$  \tcp*{}
-              $\hat{X} \leftarrow PX^\top$ \tcp*{}
+              %$P \leftarrow \WAK(K^{\top}K)$  \tcp*{}
+              $\hat{X} \leftarrow \PWAK(K)X^\top$ \tcp*{}
               $l \leftarrow \MSE(\hat{X},X)$ \tcp*{}
               \KwRet{$l$}
             }

@@ -3,7 +3,6 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{amsmath}
-\usepackage{url}
 
 \usepackage{arxiv}
 
@@ -19,6 +18,9 @@
 \usepackage{graphicx}
 
 \usepackage{algorithm2e}
+
+
+\usepackage{authblk}
 
 \usepackage[backend=biber]{biblatex}
 \addbibresource{refs.bib}
@@ -38,13 +40,20 @@
 \newcommand{\linear}{\txtop{linear}}
 \newcommand{\sigmoid}{\txtop{sigmoid}}
 \newcommand{\argmin}{\txtop{argmin}}
+\newcommand{\einsum}{\txtop{einsum}}
 \newcommand{\ntos}{\txtop{noise2self}}
+\newcommand{\leiden}{\txtop{leiden}}
 
-\newcommand{\DeePWAK}{\txtop{DeePWAK}}
 \newcommand{\encoder}{\txtop{encoder}}
 \newcommand{\decoder}{\txtop{decoder}}
 \newcommand{\partitioner}{\txtop{partitioner}}
 
+\newcommand{\mathWAK}{\txtop{WAK}}
+\newcommand{\mathPWAK}{\txtop{PWAK}}
+\newcommand{\mathDEWAKSS}{\txtop{DEWAKSS}}
+\newcommand{\mathPart}{\txtop{Partitioner}}
+\newcommand{\mathDeePWAK}{\txtop{DeePWAK}}
+\newcommand{\mathDeePWAKBlock}{\txtop{DeePWAKBlock}}
 
 \SetKwProg{Fn}{Function}{}{end}
 \SetKwProg{Dat}{Data}{}{end}
@@ -62,7 +71,9 @@
 \SetKwFunction{sample}{sample}
 \SetKwFunction{loss}{loss}
 \SetKwFunction{train}{train}
+
 \SetKwFunction{WAK}{WAK}
+\SetKwFunction{PWAK}{PWAK}
 \SetKwFunction{DEWAKSS}{DEWAKSS}
 \SetKwFunction{DeePWAKBlock}{DeePWAKBlock}
 \SetKwFunction{DeePWAK}{DeePWAK}
@@ -77,25 +88,22 @@
 
 \date{\today}
 
-\title{Denoising with a Partitioned Affinity Kernel Allows Efficient End-to-End Differentiable Clustering}
+\title{Denoising with a Partitioned Affinity Kernel Enables Cluster-Feature Decomposition}
 
-\author{
-  Keira Wiechecki \\
-  %Center for Genomics \& Systems Biology \\
-  %New York University \\
-  \And
-  Jade Zaslavsky
-  \And
-  Margaux Failla
-  \And
-  Lionel Christiaen \\
-}
+\author[1]{Keira Wiechecki}
+\author[2]{Jade Zaslavsky}
+\affil[1]{Center for Genomics \& Systems Biology, New York University \\
+  \texttt{kaw504@nyu.edu}}
+\affil[2]{Transcribbit}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Here we introduce Denoising by Deep learning of a Partitoned Weighted Affinity Kernel (DeePWAK). 
+  We introduce a new method of deep clustering using denoising.
+  A denoising-based loss function allows for simultaneously learning a partition and an embedding of a data set.
+  We find that without imposing any sparcity constraints, this method learns a sparse decomposition of the latent feature space and the latent cluster space.
+  
 \end{abstract}
 
 \input{sections/introduction.tex}
@@ -106,10 +114,10 @@ Here we introduce Denoising by Deep learning of a Partitoned Weighted Affinity K
 
 \input{sections/discussion.tex}
 
-
-
 \section{Conclusion}
 
 \printbibliography
+
+\input{sections/appendix.tex}
 
 \end{document}

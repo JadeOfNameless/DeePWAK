@@ -16,9 +16,9 @@
 
   \node[] (concat) [right=of h3] {$\oplus$} ;
 
-  \node[punkt] (linear) [right=of concat] {consensus partitioner} ;
-  \node[punkt] (softmax) [below=of linear] {softmax};
-  \node[] (Xhat) [below=of softmax] {$C_c$} ;
+  \node[punkt] (linear) [right=of concat] {$\partitioner^{5 \times k \to k}_c$} ;
+  \node[punkt] (softmax) [below=of linear] {$\softmax$};
+  \node[] (Xhat) [below=of softmax] {$K_c$} ;
 
   
   \draw[pil] %(preprocessing) edge (X)

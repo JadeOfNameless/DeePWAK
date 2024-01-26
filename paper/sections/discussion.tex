@@ -1,5 +1,30 @@
 \section{Discussion}
 
-\subsection{Application to Sparse Dictionary Learning}
+\subsection{Cluster-feature decomposition}
+This striking result seems likely to be due to learning an embedding and partition of the data simultaneously.
 
-\subsection{Recurrent DeePWAK}
+\paragraph{Na\"ive Bayes interpretation}
+For each minibatch forward pass, the partitioner gives a prior on each sample being in the same cluster.
+During training it updates based on how well its classification does at predicting the data.
+
+\paragraph{GCN interpretation}
+A key insight of $\ntos$ is the unique power of generative processes.
+
+
+
+\subsection{Application to sparse dictionary learning}
+
+The embeddings appear to be representing the data as a sparse dictionary of features.
+These features appear to match observable phenotypes.
+Clusters are also sparse. However, \textit{there are more clusters than features}.
+This is suggestive that data may be represented as \textit{combinatoric} mixtures of features. 
+
+\subsection{The future of SAEs}
+
+We suspect combinatoric encoding of this sort is possible because \DeePWAK performs computation on an entire minibatch.
+
+\subsection{Insight into the unreasonable effectiveness of transformers}
+\paragraph{$QK,OV$ decomposition}
+\paragraph{Context matters even when there's no positional information}
+\paragraph{Attention is graph diffusion}
+\paragraph{Attention is $\ntos$}

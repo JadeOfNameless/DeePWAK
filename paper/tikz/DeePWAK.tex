@@ -15,11 +15,11 @@
   \node[punkt] (softmax) [below=of partitioner] {\softmax} ;
 
   \node[] (K) [below=of softmax] {$K^{k \times n}$} ;
-  \node[punkt] (Ktranspose) [left=of K] {\transpose} ;
-  \node[punkt] (KK) [below=of Ktranspose] {\matmul} ;
-  \node[] (P) [below=of KK] {$P^{n \times n}$} ;
-  \node[punkt] (wak) [right=of P] {\WAK} ;
-  \node[punkt] (GE) [right=of wak] {\matmul} ;
+  %\node[punkt] (Ktranspose) [left=of K] {\transpose} ;
+  %\node[punkt] (KK) [below=of Ktranspose] {\matmul} ;
+  %\node[] (P) [below=of KK] {$P^{n \times n}$} ;
+  \node[punkt] (wak) [below=of K] {\PWAK} ;
+  \node[punkt] (GE) [below=of Etranspose] {\matmul} ;
   \node[] (Ehat) [below=of GE] {$\hat{E}^{d \times n}$} ;
 
   \node[punkt] (decoder) [left=of Ehat] {$\decoder^{d \to m}$} ;
@@ -34,11 +34,11 @@
   (X) edge (partitioner)
   (partitioner) edge (softmax)
   (softmax) edge (K)
-  (K) edge (Ktranspose)
-  (Ktranspose) edge (KK)
-  (K) edge (KK)
-  (KK) edge (P)
-  (P) edge (wak)
+  (K) edge (wak)
+  %(Ktranspose) edge (KK)
+  %(K) edge (KK)
+  %(KK) edge (P)
+  %(P) edge (wak)
   (wak) edge (GE)
   (GE) edge (Ehat)
 

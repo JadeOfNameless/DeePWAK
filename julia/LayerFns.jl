@@ -110,9 +110,25 @@ function softmod(G::AbstractMatrix,P::AbstractMatrix,γ::Union{Integer,Float32,F
     return calH
 end
 
+function mlp(l,f::Function)
+    θ = foldl(l[3:length(l)],
+              init=Chain(Dense(l[1] => l[2],f))) do layers,d
+        d_0 = size(layers[length(layers)].weight)[1]
+        return Chain(layers...,Dense(d_0 => d,f))
+    end
+end
+    
+
 # ∀ m,l:Int f:(Float -> Float) -> Chain [(Dense m m f) l]...
 function mlp(m::Integer,l::Integer,σ=relu)
     return Chain(map(_->Dense(m => m, σ),1:l)...)
+end
+
+function mlp(m::Integer,d::Integer,l::Integer,s::Integer,f=σ)
+    n = maximum([m,d])
+    return Chain(Dense(m => s * n,f),
+                 map(_->Dense(s * n => s * n, f),1:(l-2))...,
+                 Dense(4*n => d,f))
 end
 
 # ∀ m,l:Int f:(Float -> Float) -> Chain (Dense m f) l
@@ -140,26 +156,6 @@ function scaledat(X::AbstractArray,dims=1)
     return Y
 end
 
-# ∀ n,m,d,c:Int -> Autoencoder m d -> ClustNetwork d c -> [Float m n] -> Float 
-function loss(f,π::ClustNetwork,X)
-    E = f[1](X)
-    D = normeucl(E)
-
-    C = π(X)
-    P = C' * C
-    G = wak(D) .* P
-
-    Ehat = (G * E')'
-    Flux.mse(f[2](Ehat),X)
-end
-
-# ∀ n,m,d,c:Int -> ClustNetwork d c -> Autoencoder m d -> [Float m n] -> Float
-function modularity(f::ClustNetwork,autoencoder,X)
-    E = autoencoder[1](X)
-    D = normeucl(E)
-    G = wak(D)
-
-    C = f(X)
-    P = C' * C
-    return -softmod(G,P,γ)
+function clusts(C::AbstractMatrix)
+    return map(x->x[1],argmax(C,dims=1))
 end

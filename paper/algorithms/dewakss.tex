@@ -2,16 +2,9 @@
   \caption{Hyperparameter optimization with DEWAKSS.}
   \DontPrintSemicolon  % Don't print semicolons
   
-  \Hyper{}
-  {$d_{max}$ : $\mathbb{N}$ \tcp*{maximum number of PCs}}
-  {$k_{max}$ : $\mathbb{N}$ \tcp*{maximum number of neighbors}}
-
-  \KwIn{}
-  {$X$ : $\mathbb{R}^{m \times n}$ \tcp*{input data}}
-
-  \KwOut{}
-        {$d$ : $\mathbb{N}$ \tcp*{optimal number of PCs}}
-        {$k$ : $\mathbb{N}$ \tcp*{optimal number of neighbors}}
+  \Hyper{$d_{max},k_{max}$ : $\mathbb{N}$ \tcp*{maximum number of PCs, neighbors}}
+  \KwIn{$X$ : $\mathbb{R}^{m \times n}$ \tcp*{input data}}
+  \KwOut{$d,k$ : $\mathbb{N}$ \tcp*{optimal number of PCs, neighbors}}
 
   \Begin{
     $E \leftarrow \pca(X)$ \tcp*{principal components}
@@ -20,7 +13,7 @@
         $D \leftarrow \eucl(E[1:d])$ \tcp*{euclidean distance}
         \For{$k \in \{1:k_{max}\}$}{
           $G \leftarrow \knn(D,k)$ \tcp*{kNN adjacency matrix}
-          $W \leftarrow \WAK(G)$ \tcp*{weighted affinity kernel}
+          $W \leftarrow \WAK(G \odot D)$ \tcp*{weighted affinity kernel}
           $\hat{X} \leftarrow WX^\top$ \tcp*{denoised data}
           $L[d,k] \leftarrow \MSE(X \hat{X})$ \tcp*{mean squared error}
         }

@@ -9,19 +9,16 @@
   \node[] (X) {$X^{m \times n}$} ;
   \node[punkt] (encoder) [right=of X] {$\encoder^{m \to d}$} ;
 
-  \node[] (E) [right=of encoder] {$E_c^{d \times n}$} ;
-  \node[punkt] (Etranspose) [below=of E] {transpose} ;
+  \node[] (E) [below=of encoder] {$E^{d \times n}$} ;
+  \node[punkt] (Etranspose) [below=of E] {$\transpose$} ;
 
-  \node[] (C) [below=of X] {$C^{c \times n}$} ;
-  \node[punkt] (Ctranspose) [right=of C] {transpose} ;
-  \node[punkt] (CC) [below=of Ctranspose] {matmul} ;
-  \node[] (P) [below=of CC] {$P^{n \times n}$} ;
-  \node[punkt] (wak) [below=of P] {WAK} ;
-  \node[punkt] (GE) [right=of wak] {matmul} ;
+  \node[] (K) [left=of Etranspose] {$K_c^{k \times n}$} ;
+  \node[punkt] (wak) [below=of K] {$\mathPWAK$} ;
+  \node[punkt] (GE) [below=of Etranspose] {$\matmul$} ;
   \node[] (Ehat) [below=of GE] {$\hat{E}^{d \times n}$} ;
 
-  \node[punkt] (decoder) [right=of Ehat] {$\decoder^{d \to m}$} ;
-  \node[] (Xhat) [right=of decoder] {$\hat{X}^{m \times n}$} ;
+  \node[punkt] (decoder) [left=of Ehat] {$\decoder^{d \to m}$} ;
+  \node[] (Xhat) [left=of decoder] {$\hat{X}^{m \times n}$} ;
 
   \draw[pil] %(preprocessing) edge (X)
   
@@ -30,11 +27,7 @@
   (E) edge (Etranspose)
   (Etranspose) edge (GE)
 
-  (C) edge (Ctranspose)
-  (Ctranspose) edge (CC)
-  (C) edge (CC)
-  (CC) edge (P)
-  (P) edge (wak)
+  (K) edge (wak)
   (wak) edge (GE)
   (GE) edge (Ehat)
 
