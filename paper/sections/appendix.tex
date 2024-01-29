@@ -1,0 +1,153 @@
+\appendix
+
+\section{Notation}
+\label{app:notation}
+Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality.
+A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters.
+Capital Greek letters indicate lists of parameters for multiple models.
+Boldface Greek letters indicate parameter spaces.
+%For parameters $\theta$, $\theta^{m \to d}$ indicates parameters for a model that accepts an input of dimension $m$ and returns an output of dimension $d$.
+
+$\fn^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\fn$.
+
+$\odot$ is the Hadamard product.
+
+$\map^n_{i=k}\expr$ indicates mapping $\expr$ over $i \in \{k:n\}$.
+
+$\map^{X,Y}_{x,y}\expr$ indicates mapping $\expr$ over $(x \in X,y \in Y)$.
+
+$\List(\Type,n)$ indicates a list of $n$ elements of \Type.
+
+We will sometimes find it necessary to distinguish between a model, a model's architecture, and a model's parameters.
+$f:\Model(n,m)$ indicates a model $f:\mathbb{R}^n \to \mathbb{R}^m$.
+
+$\mathcal{F}:\Arch(n,m)$ indicates an architecture for a model $\Model(n,m)$.
+
+$\theta:\Params(\mathcal{F})$ indicates the parameters for $\mathcal{F}$.
+
+We use the notation $\mathcal{F}(\theta)$ to indicate a model architecture $\mathcal{F}$ parameterized by $\theta$.
+$\mathcal{F}(\theta)(X)$ indicates passing data $X$ to the model $\mathcal{F}(\theta)$.
+We write this as a curried function to emphasize that $\mathcal{F}(\theta)$ is stateful.
+
+\section{Additional Background}
+
+\subsection{$\ntos$}
+\label{app:ntos}
+
+
+Let $J \in \mathcal{J}$ be independent partitions of noisy data $X$. Let $\mathcal{F}(\theta)$ be a family of predictors of $X_J$ with tunable parameters $\theta \in \mathbf{\Theta}$ that depends on its complement $X_{J^C}$
+
+\begin{equation}
+  \hat{X}_J=\mathcal{F}(\theta)(X_{J^C})
+\end{equation}
+
+In other words, $\mathcal{F}$ predicts each data point $X_J$ from some subset of the data excluding $X_J$. 
+
+  The optimal $\theta$ is given by
+
+\begin{equation}
+  \label{eq:ntos}
+  \ntos_\theta^{\mathbf{\Theta}}[\mathcal{F}(\theta),X] := \argmin_\theta^{\mathbf{\Theta}}[\sum_{J}^{\mathcal{J}}\mathbb{E}[X_J-\mathcal{F}(\theta)(X_{J^C})]^2]
+\end{equation}
+
+\subsection{$\mathDEWAKSS$}
+\label{app:DEWAKSS}
+\DEWAKSS\cite{tjarnberg2021} is a method of data imputation to address sparcity in single cell RNA-seq experiments.
+It generates a $k$-NN graph from the top $d$ principal components.
+By using a graph partitioning algorithm such as $\leiden$\cite{DBLP:journals/corr/abs-1810-08473},
+it can easily be turned into a clustering algorithm.
+Because these are nondifferentiable function, it has to grid search over all possible values.
+This severely limits the number of tunable parameters we can add, motivating finding an end-to-end differentiable alternative.
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{10NN100.pdf}
+  \caption{Illustration of diffusion with $\mathDEWAKSS$. In this case the kernel is a 10-NN computed using the first 10 PCs of the data. Note that the denoised result is substantially smoother than the input data. While smoothing is often desirable for data imputation, for our purposes we would prefer to perserve variation.}
+  \label{fig:diffusion}
+\end{figure}
+
+\input{algorithms/wak.tex}
+
+\input{algorithms/dewakss.tex}
+
+\section{Types}
+
+\subsection{$\mathPart$}
+\label{app:Partitioner}
+
+The only hyperparameters are the maximum number of clusters, the neural net architecture, and the training hyperparameters.
+Because $PX^\top$ is $\mathcal{J}$-invariant, this classifier will converge on a solution less than the maximum $k$.
+Intuitions from transformers may be helpful in visualizing why this works.
+Informally, $P$ can be equated to position-independent attention with data points as tokens and the batch size as the context window.
+Attentive readers may make a connection between masking the diagonal and BERT.
+\input{types/partitioner.tex}
+
+\input{algorithms/partitioner.tex}
+
+\input{train/partitioner.tex}
+
+\subsection{$\mathDeePWAK$}
+\label{app:DeePWAK}
+
+We refer to the classifier subnetwork as a ``partitioner'' to emphasize that the data are unlabeled.
+There is no accuracy measure separate from the decoder loss.
+The partitioner simply tries to find the best $P$ for minimizing loss of the decoded output.
+It can be considered a form of deep embedding clustering\cite{xie2016unsupervised}.
+However there are several key differences from the canonical DEC implementation.
+Because we use a loss function based on $\ntos$, we don't need to carefully choose a kernel
+
+The DeePWAK algorithm is inspired by dot product attention, but has a few key differences.
+Because it is position-independent, $Q$ and $K$ are simply transposes of each other.
+Instead of a shared MLP layer, each head has a separate encoder and decoder.
+This makes it easier to reason about components in isolation.
+
+\input{types/deepwak.tex}
+
+\input{algorithms/deepwak.tex}
+
+\subsection{$\mathDeePWAKBlock$}
+
+\input{types/block.tex}
+
+\input{algorithms/block.tex}
+
+\subsection{Consensus Clusters}
+\label{app:consensus}
+
+\section{Ensemble Clustering Example}
+\label{app:ensemble}
+
+\subsection{Example Data}
+We tested DeePWAK on preprocessed data from 3D microscopy.
+This data set was obtained from 1853 \textit{Ciona robusta} embryos.
+
+PCA-based methods perform poorly on this data set.
+
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{params.pdf}
+    \caption{Preprocessed microscopy data. }
+    \label{fig:params}
+\end{figure}
+
+\begin{figure}
+     \begin{subfigure}[b]{0.5\textwidth}
+        \input{tikz/layers.tex}
+         \caption{}
+         \label{fig:}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{\textwidth}
+        \input{tikz/consensuslayers.tex}
+        \caption{}
+        \label{fig:}
+     \end{subfigure}
+
+     \caption{
+       (a) Encoder, partitioner, and decoder submodels used for clustering.
+       (b) Submodels used to derive consensus encoder and consensus partitioner.
+       %These are the architectures used in Section 3, but the algorithm generalizes to any
+       %$f,g,h:\mathbb{R}^* \to \mathbb{R}^*$ with appropriate input and output dimensions.
+       %In this case $m=114$, $d=14$,and $k=14$.
+     }
+\end{figure}
+

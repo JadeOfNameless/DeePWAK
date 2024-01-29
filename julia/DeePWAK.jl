@@ -81,10 +81,10 @@ function train!(M,loader,opt,test::AbstractMatrix,epochs::Integer)
     return L
 end
 
-function train!(M,loader,opt,epochs::Integer)
+function train!(M,loader,opt,epochs::Integer,loss)
     L = @showprogress map(1:epochs) do _
         map(loader) do (x,y)
-            l = update!(M,f->Flux.mse(f(x),x),opt)
+            l = update!(M,f->loss(f(x),x),opt)
             return l
         end
     end

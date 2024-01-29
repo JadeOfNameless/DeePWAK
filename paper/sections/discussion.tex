@@ -1,16 +1,19 @@
 \section{Discussion}
 
-\subsection{Cluster-feature decomposition}
+%\subsection{Cluster-feature ($KE$) decomposition}
+\subsection{Data are singular}
 This striking result seems likely to be due to learning an embedding and partition of the data simultaneously.
 
-\paragraph{Na\"ive Bayes interpretation}
+\paragraph{MCMC interpretation}
 For each minibatch forward pass, the partitioner gives a prior on each sample being in the same cluster.
 During training it updates based on how well its classification does at predicting the data.
 
 \paragraph{GCN interpretation}
 A key insight of $\ntos$ is the unique power of generative processes.
+Unlike most deep clustering methods, \DeePWAK does not perform clustering on the embedding space.
 
 
+\paragraph{Can GANs be generalized as learning $KE$ decomposition?}
 
 \subsection{Application to sparse dictionary learning}
 
@@ -28,3 +31,5 @@ We suspect combinatoric encoding of this sort is possible because \DeePWAK perfo
 \paragraph{Context matters even when there's no positional information}
 \paragraph{Attention is graph diffusion}
 \paragraph{Attention is $\ntos$}
+
+%\subsection{Ontologies for free!}

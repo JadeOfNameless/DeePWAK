@@ -5,6 +5,8 @@ Denoising, compression, and clustering all ultimately attempt to solve this prob
 Denoising aims to remove spurious dimensions whereas compression looks to select informative dimensions.
 The connection to clustering is less obvious, but no less foundational\cite{9830658}.
 
+Compression is a generalization of supervised learning. 
+We propose that 
 
 At its heart, clustering is an optimization problem of how to partition a data set given some loss function.
 
@@ -38,15 +40,27 @@ Identifying informative latent features means throwing out uninformative latent 
 Optimizing (1) is essentally the goal of sparse dictionary learning, where
 $C$ is the dictionary and $K$ is the key.
 
-\paragraph{Clustering as the optimal way of labeling a data set}
-
-I propose 
 
 \paragraph{Clusters as attractor states}
 One of the most beautiful results from information theory is that \textit{prediction is thermodynamic work}.
-Consider 
+The entropy of any dataset can be expressed in terms of transition probabilities.
+The entropy of a partition can be expressed as a mask applied to this transition matrix.
+An optimal clustering has maximal entropy\cite{e17010151}.
+This is equivalent to saying that the optimal partition is the one that \textit{deletes} the most information from the data when adopted as a prior.
+
+\paragraph{Clustering as the optimal way of labeling a data set}
+Though clustering is normally phrased as an unsupervised learning problem,
+it may be informative to frame it as \textit{the dual of supervised learning}.
+In other words, instead of finding the features that contain the most information given a labeling,
+
 
 Code is available at \url{https://github.com/kewiechecki/DeePWAK}.
+
+\section{Background}
+
+\subsection{The unreasonable effectiveness of transformers}
+
+\subsection{The unreasonable effectiveness of MoE}
 
 \subsection{Notation}
 Details are in Appendix \ref{app:notation}.
@@ -78,7 +92,7 @@ This suggests the possibility of merging low level features or splitting high le
 
 
 
-\subsection{$\ntos$}
+\subsection{Denoising the data explains the data}
 For a large class of denoising functions, it is possible to find optimal parameters using only unlabeled noisy data\cite{batson2019noise2self}.
 
 See Appendix \ref{app:ntos}.

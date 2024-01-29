@@ -28,9 +28,12 @@ It is a deep learning architecture consisting of an encoder, partitioner, and de
   
 \subsection{Ensemble $\mathDeePWAK$}
 
-\DeePWAK can be used for ensemble clustering by training multiple heads in parallel and linearly combining the results. We refer to this as a \DeePWAKBlock.
+\DeePWAK can be used for ensemble clustering by training multiple heads in parallel and linearly combining the results.
+We refer to this as a \DeePWAKBlock.
+An intuitive interpretation is that each head learns to cluster a different ``slice'' of the data.
 
 After training the \DeePWAKBlock, we can attempt to learn pooling models that compute consensus clusters and embeddings (Fig. \ref{fig:consensus} Appendix \ref{app:consenus}).
+:
 
 \begin{figure}
      \begin{subfigure}[b]{0.5\textwidth}
