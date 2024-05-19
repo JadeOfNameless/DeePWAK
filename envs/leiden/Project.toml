@@ -1,0 +1,5 @@
+[deps]
+Leiden = "8876827e-33c4-4373-8179-6e3204d93767"
+MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
+igraph_jll = "4d841945-e0c2-5143-9479-18e4f0102556"
+leiden_jll = "b3d7b256-84d9-5f32-9065-d6f1a433f499"

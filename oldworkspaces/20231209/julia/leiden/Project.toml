@@ -1,0 +1,7 @@
+[deps]
+Functors = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
+InvertedIndices = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+Leiden = "8876827e-33c4-4373-8179-6e3204d93767"
+MLDatasets = "eb30cadb-4394-5ae3-aed4-317e484a6458"
+igraph_jll = "4d841945-e0c2-5143-9479-18e4f0102556"
+leiden_jll = "b3d7b256-84d9-5f32-9065-d6f1a433f499"

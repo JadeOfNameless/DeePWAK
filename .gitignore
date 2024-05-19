@@ -1,0 +1,29 @@
+#ignore all files 
+*
+#don't ignore directories
+!/**/
+#then, allow our whitelisted extensions
+!**/*.jl
+!**/*.R
+!**/*.md
+!**/*.tex
+!**/*.bib
+!**/*.toml
+#etc
+# include gitignore
+!.gitignore
+
+#*~
+##*#
+#*.pdf
+#tmp*
+#*.csv
+#*.tsv
+#*.jld2
+#*.txt
+#*.zip
+#dewakss/*
+#workspaces/*
+#oldworkspaces/*
+#paper/*
+#data/*

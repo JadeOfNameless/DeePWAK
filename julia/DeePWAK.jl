@@ -56,10 +56,9 @@ function (M::DeePWAK)(X::AbstractMatrix)
     #w = (softmax ∘ m.weigher)(X)
     #E = w .* m.encoder(X)
     E = M.encoder(X)
-    C = M.partitioner(X)
-    P = C' * C
-    G = wak(P)
-    Ehat = (G * E')'
+    K = M.partitioner(X)
+    P = pwak(K)
+    Ehat = (P * E')'
     return M.decoder(Ehat)
 end
 
@@ -70,9 +69,30 @@ function update!(M,loss::Function,opt)
     return l
 end
 
+function update!(M,x,y,loss::Function,opt)
+    x = gpu(x)
+    y = gpu(y)
+    f = m->loss(m(x),y)
+    state = Flux.setup(opt,M)
+    l,∇ = Flux.withgradient(f,M)
+    Flux.update!(state,M,∇[1])
+    return l
+end
+
+function train!(M,loader,opt,epochs,loss,log)
+    @showprogress map(1:epochs) do _
+         map(loader) do (x,y)
+            l = update!(M,x,y,loss,opt)
+            push!(log,l)
+        end
+    end
+end
+
 function train!(M,loader,opt,test::AbstractMatrix,epochs::Integer)
     L = @showprogress map(1:epochs) do _
         map(loader) do (x,y)
+            x = gpu(x)
+            y = gpu(y)
             l_test = Flux.mse(M(test),test)
             l_train = update!(M,f->Flux.mse(f(x),x),opt)
             return l_train,l_test
@@ -84,7 +104,9 @@ end
 function train!(M,loader,opt,epochs::Integer,loss)
     L = @showprogress map(1:epochs) do _
         map(loader) do (x,y)
-            l = update!(M,f->loss(f(x),x),opt)
+            x = gpu(x)
+            y = gpu(y)
+            l = update!(M,f->loss(f(x |> gpu),y |> gpu),opt)
             return l
         end
     end

@@ -1,0 +1,3 @@
+[submodule "julia/SparseEncoders"]
+	path = julia/SparseEncoders
+	url = git@github.com:kewiechecki/SparseEncoders.git

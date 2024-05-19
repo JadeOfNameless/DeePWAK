@@ -1,9 +1,13 @@
 \section{Introduction}
+
   %Clustering is a special case of sparse dictionary learning where all features are discrete.
-Fundamentally, unsupervised learning is a problem of finding the latent space of a data set.
+Fundamentally, unsupervised learning is a problem of finding the latent structure of a data set.
+
 Denoising, compression, and clustering all ultimately attempt to solve this problem, but approach it from different directions.
 Denoising aims to remove spurious dimensions whereas compression looks to select informative dimensions.
 The connection to clustering is less obvious, but no less foundational\cite{9830658}.
+
+\subsection{Features, clusters, embeddings, and concepts}
 
 Compression is a generalization of supervised learning. 
 We propose that 
@@ -11,6 +15,8 @@ We propose that
 At its heart, clustering is an optimization problem of how to partition a data set given some loss function.
 
 There are a few ways to conceptualize this isomorphism.
+
+\paragraph{Clustering as singular value decomposition}
 
 \paragraph{Clustering as principal components in latent space}
 Data are sparse in latent space.
@@ -52,18 +58,43 @@ This is equivalent to saying that the optimal partition is the one that \textit{
 Though clustering is normally phrased as an unsupervised learning problem,
 it may be informative to frame it as \textit{the dual of supervised learning}.
 In other words, instead of finding the features that contain the most information given a labeling,
+it finds the labeling that contains the mose information given a set of features.
 
 
 Code is available at \url{https://github.com/kewiechecki/DeePWAK}.
 
-\section{Background}
+\section{Related Work}
+
+\subsection{Sparse autoencoders}
+Sparse dictionary learning has become a powerful tool for interpretation of neural networks. 
+A sparse autoencoder (SAE) can decompose the activations of a neural network into a linear combination of dictionary features\cite{cunningham2023sparse}.
+There are several limitations to this technique as currently applied.
+The number of features must be preselected.
+Interpretation of features still relies on manual inspection,
+but there is no structure or organization imposed on the dictionary.
+This results in a tradeoff between feature interpretability and feature search space. 
+It would be desirable to be able to selectively decompose higher level features into lower level features.
+One of the most interesting properties of SAEs is that features seem to be organized into clusters\cite{bricken2023monosemanticity}.
+This suggests the possibility of merging low level features or splitting high level features.
 
 \subsection{The unreasonable effectiveness of transformers}
 
 \subsection{The unreasonable effectiveness of MoE}
 
+\section{Background}
+
 \subsection{Notation}
-Details are in Appendix \ref{app:notation}.
+We use lowecase Latin characters to denote scalars, boldface lowecase characters to denote vectors, and capital Latin characters to denote matrices.
+Subscripts indicate indices.
+Because we will mostly be working with matrices in $\mathbb{R}$, we abbreviate $X : \mathbb{R}^{m \times n}$ as $X^{m \times n}$.
+We use a circumflex to indicate a reconstruction of an input by a predictor.
+Lowercase Greek characters indicate the parameters of a model.
+
+Function names are in monospace.
+
+$\fn^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\fn$.
+
+Additional details are in Appendix \ref{app:notation}.
 
 %Though applications of deep learning to classification is well established, self-supervised classification has been much less thoroghly explored.
 %Deep clustering is an active area of research\cite{ren2022deep}.
@@ -75,21 +106,6 @@ Details are in Appendix \ref{app:notation}.
 %Our approach uses what we believe to be a previously unexplored combination of an information bottleneck with self-supervised denoising.
 %Like ClAM\cite{saha2023endtoend} it is end-to-end differentiable.
 %Unlike ClAM,
-
-\section{Related Work}
-
-\subsection{Sparse autoencoders}
-Sparse dictionary learning has become a powerful tool for interpretation of neural networks. 
-The activations of a neural network can be decomposed into a linear combination of dictionary features\cite{cunningham2023sparse}.
-There are several limitations to this technique as currently applied.
-The number of features must be preselected.
-Interpretation of features still relies on manual inspection,
-but there is no structure or organization imposed on the dictionary.
-This results in a tradeoff between feature interpretability and feature search space. 
-It would be desirable to be able to selectively decompose higher level features into lower level features.
-One of the most interesting properties of SAEs is that features seem to be organized into clusters\cite{bricken2023monosemanticity}.
-This suggests the possibility of merging low level features or splitting high level features.
-
 
 
 \subsection{Denoising the data explains the data}
@@ -136,6 +152,23 @@ See Appendix \ref{app:Partitioner} for details.
 
 We can now train a model to classify unlabeled data into an undefined number of clusters with no prior distribution in $\mathcal{O}(n^2)$ time!
 
+\subsection{Activation space and embedding space}
+
+A key insight of the superposition hypothesis is that neurons are not the natural unit of a model's ontology.
+
+SAEs are impressively lightweight. They consist of only a single set of weights $M$ and a single $\ReLU$. A sequence $\mathbf{x}$ is encoded as
+
+\begin{equation}
+  \mathbf{c} = \ReLU(M\mathbf(x) + \mathbf{b}
+\end{equation}
+
+The activations are decoded as
+
+\begin{equation}
+  \mathbf{\hat{x}} = M^\top\mathbf{c}
+\end{equation}
+
+A limitation of this implementation is that features in activation space can only be expressed as linear combinations of features in the embedding space.
 
 \subsection{Diffusion in embedding space}
 

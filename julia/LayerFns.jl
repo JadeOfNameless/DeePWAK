@@ -16,25 +16,6 @@ function H(W::AbstractMatrix;dims=1)
     return -sum(W .* log2.(W),dims=dims)
 end
 
-function zerodiag(G::AbstractArray)
-    m, n = size(G)
-    G = G .* (1 .- I(n))
-    return G
-end
-
-# [CuArray] -> [CuArray]
-# workaround for moving identity matrix to GPU 
-function zerodiag(G::CuArray)
-    m, n = size(G)
-    G = G .* (1 .- I(n) |> gpu)
-    return G
-end
-
-function neighborcutoff(G::AbstractArray; ϵ=0.0001)
-    M = G .> ϵ
-    return G .* M
-end
-
 # [[Float]] -> [[Float]]
 # constructs weighted affinity kernel from adjacency matrix
 # sets diagonal to 0
@@ -44,6 +25,12 @@ function wak(G::AbstractArray; dims=1)
     G = G ./ (sum(G,dims=dims) .+ eps(eltype(G)))
     return G
 end
+
+function pwak(K::AbstractMatrix; dims=1)
+    P = K' * K
+    return wak(P)
+end
+
 
 # [CuArray] -> [CuArray]
 # version of Euclidean distance compatible with Flux's automatic differentiation
@@ -55,6 +42,26 @@ function euclidean(x::CuArray{Float32};dims=1)
     D = sqrt.(max.(D, 0) .+ eps(Float32))  # Ensure no negative values due to numerical errors
     return D
 end
+using CUDA
+
+# [CuArray] -> [CuArray]
+# function to calculate cosine similarity matrix
+function cossim(x::CuArray{Float32}; dims=1)
+    # Normalize each column (or row, depending on 'dims') to unit length
+    norms = sqrt.(sum(x .^ 2, dims=dims))
+    x_normalized = x ./ norms
+
+    # Compute the cosine similarity matrix
+    # For cosine similarity, the matrix multiplication of normalized vectors gives the cosine of angles between vectors
+    C = x_normalized' * x_normalized
+
+    # Ensure the diagonal elements are 1 (numerical stability)
+    i = CartesianIndex.(1:size(C, 1), 1:size(C, 1))
+    C[i] .= 1.0
+
+    return C
+end
+
 
 # [CuArray] -> [CuArray]
 # returns reciprocal Euclidean distance matrix
@@ -137,25 +144,4 @@ function mlp4x(m::Integer,d::Integer,l::Integer,σ=σ)
     return Chain(Dense(m => 4 * n),
                  map(_->Dense(4 * n => 4*n, σ),1:(l-2))...,
                  Dense(4*n => d))
-end
-
-# ∀ A:Type m,n:Int -> [A m n] -> k:Int -> ([A m k],[A m n-k])
-function sampledat(X::AbstractArray,k)
-    _,n = size(X)
-    sel = sample(1:n,k,replace=false)
-    test = X[:,sel]
-    train = X[:,Not(sel)]
-    return test,train
-end
-
-# ∀ m,n:Int -> [Float m n] -> [Float m n]
-#scales each column (default) or row to [-1,1]
-function scaledat(X::AbstractArray,dims=1)
-    Y = X ./ maximum(abs.(X),dims=dims)
-    Y[isnan.(Y)] .= 0
-    return Y
-end
-
-function clusts(C::AbstractMatrix)
-    return map(x->x[1],argmax(C,dims=1))
 end

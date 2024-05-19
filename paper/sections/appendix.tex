@@ -2,21 +2,42 @@
 
 \section{Notation}
 \label{app:notation}
-Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality.
-A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters.
+%Capital letters indicate matrices. Subscripts indicate indices. Superscripts indicate dimensionality.
+%A circumflex indicates a reconstruction of data by a predictor. Lowercase Greek letters indicate tunable parameters.
 Capital Greek letters indicate lists of parameters for multiple models.
 Boldface Greek letters indicate parameter spaces.
 %For parameters $\theta$, $\theta^{m \to d}$ indicates parameters for a model that accepts an input of dimension $m$ and returns an output of dimension $d$.
 
-$\fn^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\fn$.
+%$\fn^{n \to m}$ indicates a layer with input dimension $n$, output dimension $m$, and activation function $\fn$.
 
 $\odot$ is the Hadamard product.
+
+Mapping an expression over an input vector and concatenating the result is ubiquitous enough that ti deserves its own operator.
+We denote this with $\bigoplus$.
 
 $\map^n_{i=k}\expr$ indicates mapping $\expr$ over $i \in \{k:n\}$.
 
 $\map^{X,Y}_{x,y}\expr$ indicates mapping $\expr$ over $(x \in X,y \in Y)$.
 
+We occasionally also use $\einsum$\cite{} notation for tensor operations.
+Some examples:
+
+$\einsum^{ij,jk \to ik}(X,Y)$ is equivalent to the dot product.
+
+$\einsum^{ij \to i}(X)$ sums over $X_{i,:}$ and returns 
+
+\subsection{Dependent Types}
+
+Because we are working with models composed of submodels, we would like to be able to impose constraints on which sort of submodels can be composed into a model of a given type.
+To accomplish this it is necessary to define the inputs and outputs of constituent models with typechecking.
+
+
+We use capitalized monospace to indicate types.
+Dependent types are given as $\Type(x)$. 
+
 $\List(\Type,n)$ indicates a list of $n$ elements of \Type.
+
+\subsection{Models, Parameters, and Architectures}
 
 We will sometimes find it necessary to distinguish between a model, a model's architecture, and a model's parameters.
 $f:\Model(n,m)$ indicates a model $f:\mathbb{R}^n \to \mathbb{R}^m$.
@@ -28,6 +49,12 @@ $\theta:\Params(\mathcal{F})$ indicates the parameters for $\mathcal{F}$.
 We use the notation $\mathcal{F}(\theta)$ to indicate a model architecture $\mathcal{F}$ parameterized by $\theta$.
 $\mathcal{F}(\theta)(X)$ indicates passing data $X$ to the model $\mathcal{F}(\theta)$.
 We write this as a curried function to emphasize that $\mathcal{F}(\theta)$ is stateful.
+
+\subsection{Pseudocode}
+
+For each model type, we define a constructor, an application rule, and a training function.
+Our definitions draw heavily on proofs as programs\cite{MARTINLOF1982153}.
+We adapt typed lambda calculus notation from LACI\cite{LACI}.
 
 \section{Additional Background}
 
