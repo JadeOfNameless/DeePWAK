@@ -12,6 +12,9 @@
 #etc
 # include gitignore
 !.gitignore
+!README
+!LICENSE
+!**/Makefile
 
 #*~
 ##*#
